@@ -1031,17 +1031,20 @@ document.addEventListener("DOMContentLoaded", init);
 /* PWA: daftarkan service worker agar bisa di-install */
 /* PWA: banner install — tampil saat browser menawarkan instalasi */
 let deferredPrompt = null;
+function isStandalone(){
+  return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+}
 function maybeShowPwa(){
   const b = document.getElementById("pwaBanner");
-  if(!b || localStorage.getItem("pwa_dismiss")) return;
+  if(!b) return;
+  if(isStandalone()){ b.style.display = "none"; return; }
+  try{ if(localStorage.getItem("pwa_dismiss")) return; }catch(e){}
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  if(isIOS && !navigator.standalone){
+  if(isIOS){
     document.getElementById("pwaSub").textContent = "Ketuk tombol Share lalu \u201CAdd to Home Screen\u201D.";
     document.getElementById("pwaBtn").style.display = "none";
-    b.style.display = "flex";
-  } else if(deferredPrompt){
-    b.style.display = "flex";
   }
+  b.style.display = "flex";
 }
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
@@ -1054,11 +1057,14 @@ window.addEventListener("appinstalled", () => {
   if(b) b.style.display = "none";
 });
 async function installPWA(){
-  if(!deferredPrompt) return;
-  deferredPrompt.prompt();
-  try{ await deferredPrompt.userChoice; }catch(e){}
-  deferredPrompt = null;
-  document.getElementById("pwaBanner").style.display = "none";
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    try{ await deferredPrompt.userChoice; }catch(e){}
+    deferredPrompt = null;
+    document.getElementById("pwaBanner").style.display = "none";
+    return;
+  }
+  alert("Untuk memasang aplikasi NBA:\n\n\u2022 Chrome Android: ketuk \u22EE \u2192 \u201CInstall app\u201D / \u201CTambahkan ke Layar utama\u201D\n\u2022 iPhone: ketuk Share \u2192 \u201CAdd to Home Screen\u201D\n\u2022 Buka lewat browser Chrome/Safari, bukan dari dalam aplikasi chat.");
 }
 function dismissPWA(){
   document.getElementById("pwaBanner").style.display = "none";
