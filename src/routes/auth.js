@@ -9,13 +9,33 @@ module.exports = function authRoutes(db) {
   r.post('/login', (req, res) => {
     const { username, password } = req.body || {};
     if (!username || !password) return res.status(400).json({ error: 'username & password wajib' });
-    const row = db.prepare('SELECT * FROM users WHERE username = ? AND aktif = 1').get(username);
+    const ident = String(username).trim();
+    const tel = ident.replace(/\D/g, '');
+    const row = db.prepare("SELECT * FROM users WHERE (username = ? OR (tel != '' AND tel = ?)) AND aktif = 1")
+      .get(ident, tel);
     if (!row || !bcrypt.compareSync(password, row.password_hash)) {
       return res.status(401).json({ error: 'username/password salah' });
     }
     req.session.userId = row.id;
     req.session.role = row.role;
     res.json({ ok: true, user: rowToUser(row) });
+  });
+
+  /* Ganti password sendiri (harus login). */
+  r.post('/ganti-password', (req, res) => {
+    if (!req.session || !req.session.userId) return res.status(401).json({ error: 'belum login' });
+    const me = db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.userId);
+    if (!me) return res.status(401).json({ error: 'belum login' });
+    const { lama, baru } = req.body || {};
+    if (!bcrypt.compareSync(lama || '', me.password_hash)) {
+      return res.status(400).json({ error: 'password lama salah' });
+    }
+    if (!baru || baru.length < 6) {
+      return res.status(400).json({ error: 'password baru minimal 6 karakter' });
+    }
+    db.prepare('UPDATE users SET password_hash = ? WHERE id = ?')
+      .run(bcrypt.hashSync(baru, 10), me.id);
+    res.json({ ok: true });
   });
 
   r.post('/logout', (req, res) => {
