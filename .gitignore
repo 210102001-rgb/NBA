@@ -5,3 +5,6 @@ data/
 *.sqlite-wal
 *.sqlite-shm
 .env
+
+# Leaflet diunduh saat deploy (terlalu besar untuk push via API)
+frontend/vendor/leaflet.js
