@@ -54,6 +54,7 @@ const MIGRATIONS = [
      id INTEGER PRIMARY KEY CHECK (id = 1), tunai INTEGER NOT NULL DEFAULT 0
    );`,
   `ALTER TABLE transaksi ADD COLUMN metode TEXT;`,
+  `ALTER TABLE berita ADD COLUMN gambar TEXT;`,
 ];
 
 function migrate(db) {
