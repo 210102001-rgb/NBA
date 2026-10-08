@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1"
+  },
+  "description": "Backend API untuk NBA Bank Sampah Digital (S-cale) \u2014 Node.js + Express + SQLite",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "main": "src/server.js",
+  "name": "nba-backend",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test test/api.test.js"
+  },
+  "type": "commonjs",
+  "version": "0.1.0"
+}
