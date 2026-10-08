@@ -222,3 +222,35 @@ test('users: admin ubah + reset password + nonaktif', async () => {
   const e6 = await put('/api/users/NBA-2026-0038', { cookie: globalThis.__nasabah, body: { nama: 'X' } });
   assert.equal(e6.status, 403);
 });
+
+test('auth: login pakai no HP', async () => {
+  const r = await post('/api/auth/login', { body: { username: '081245214521', password: 'nasabah123' } });
+  assert.equal(r.status, 200);
+  assert.equal(r.data.user.nama, 'Andi');
+  const bad = await post('/api/auth/login', { body: { username: '081245214521', password: 'salah' } });
+  assert.equal(bad.status, 401);
+});
+
+test('auth: ganti password sendiri', async () => {
+  // daftar user baru untuk tes
+  const reg = await post('/api/auth/register', { body: { nama: 'Ganti', tel: '081299988877', password: 'lama1234' } });
+  const c = reg.cookie;
+  const w1 = await post('/api/auth/ganti-password', { cookie: c, body: { lama: 'salah', baru: 'baru1234' } });
+  assert.equal(w1.status, 400);
+  const w2 = await post('/api/auth/ganti-password', { cookie: c, body: { lama: 'lama1234', baru: '123' } });
+  assert.equal(w2.status, 400);
+  const ok = await post('/api/auth/ganti-password', { cookie: c, body: { lama: 'lama1234', baru: 'baru1234' } });
+  assert.equal(ok.status, 200);
+  const login = await post('/api/auth/login', { body: { username: reg.data.user.username, password: 'baru1234' } });
+  assert.equal(login.status, 200);
+  const noauth = await post('/api/auth/ganti-password', { body: { lama: 'x', baru: 'yyyyyy' } });
+  assert.equal(noauth.status, 401);
+});
+
+test('berita: simpan dengan gambar', async () => {
+  const c = await post('/api/berita', { cookie: globalThis.__admin, body: { judul: 'Tes Gambar', isi: 'x', gambar: 'https://contoh.id/foto.jpg' } });
+  assert.equal(c.status, 201);
+  assert.equal(c.data.berita.gambar, 'https://contoh.id/foto.jpg');
+  const u = await put('/api/berita/' + c.data.berita.id, { cookie: globalThis.__admin, body: { gambar: '' } });
+  assert.equal(u.status, 200);
+});
