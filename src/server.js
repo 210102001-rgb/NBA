@@ -1,7 +1,7 @@
 'use strict';
 const { createApp } = require('./app');
 
-const PORT = Number(process.env.PORT || 3003);
+const PORT = Number(process.env.PORT || 3004);
 const { app } = createApp();
 
 app.listen(PORT, () => {

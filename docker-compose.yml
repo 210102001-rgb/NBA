@@ -5,9 +5,9 @@ services:
     container_name: nba-backend
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3003:3003"
+      - "127.0.0.1:3004:3004"
     environment:
-      PORT: 3003
+      PORT: 3004
       NBA_DB_PATH: /data/nba.sqlite
       # WAJIB diganti di produksi:
       SESSION_SECRET: ganti-session-secret-ini

@@ -9,7 +9,7 @@ Stack yang sama dengan `katalog-app`, pola deploy yang sama (Docker + nginx reve
 
 ```bash
 npm install
-npm start          # http://localhost:3003
+npm start          # http://localhost:3004
 npm test           # 9 test API end-to-end
 ```
 
@@ -36,8 +36,8 @@ Akun demo (seed otomatis saat DB kosong):
 docker compose up -d --build
 ```
 
-API di `127.0.0.1:3003` (localhost only), data di volume `nba-data`.
-Di VPS, tambahkan block `location /nba/api/` di nginx yang proxy ke `127.0.0.1:3003`
+API di `127.0.0.1:3004` (localhost only), data di volume `nba-data`.
+Di VPS, tambahkan block `location /nba/api/` di nginx yang proxy ke `127.0.0.1:3004`
 agar frontend dan API same-origin (tanpa CORS).
 
 ## Ringkasan endpoint
