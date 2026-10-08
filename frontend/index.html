@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NBA — Bank Sampah Digital · S-cale Smart Scale</title>
+<style>
+:root{
+  --nba:#16442B; --nba-d:#0E3320; --olive:#75802E; --leaf:#7CB342;
+  --gold:#EAB308; --orange:#F59E0B;
+  --blue:#1E88E5; --purple:#8E24AA; --red:#E53935;
+  --bg:#F4F8F1; --card:#FFFFFF; --ink:#1E2A22; --mut:#6B7A6E; --line:#E4EBE0;
+  --r:14px; --sh:0 2px 10px rgba(22,68,43,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14.5px;line-height:1.55}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 18px}
+
+/* ── top nav ── */
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav-in{display:flex;align-items:center;gap:12px;height:66px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;color:var(--nba)}
+.brand img{height:42px;width:auto;border-radius:8px}
+.brand small{display:block;font-size:10.5px;font-weight:600;color:var(--mut);letter-spacing:.4px}
+.nav-links{display:flex;gap:4px;margin-left:18px}
+.nav-links a{padding:9px 13px;border-radius:9px;font-weight:600;font-size:13.5px;color:#3c4a40}
+.nav-links a:hover{background:#EDF3EA}
+.nav-links a.on{background:var(--nba);color:#fff}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:10px;padding:11px 20px;font-weight:700;font-size:14px;cursor:pointer}
+.btn-p{background:linear-gradient(135deg,#35A85C,#1E6B38);color:#fff;box-shadow:0 8px 20px rgba(46,158,82,.30)}
+.btn-p:hover{background:var(--nba-d)}
+.btn-o{background:#fff;color:var(--nba);border:2px solid var(--nba)}
+.btn-g{background:var(--gold);color:#3A2A08}
+.btn-g:hover{filter:brightness(.96)}
+
+/* ── hero ── */
+.hero{background:linear-gradient(135deg,#16442B 0%,#1F5C39 55%,#2E7D46 100%);color:#fff;overflow:hidden;position:relative}
+.hero-in{display:grid;grid-template-columns:1.15fr .85fr;gap:26px;align-items:center;padding:56px 18px 64px}
+.kick{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:700;letter-spacing:.6px;margin-bottom:16px}
+.hero h1{font-size:clamp(30px,4.4vw,50px);line-height:1.12;margin:0 0 14px;letter-spacing:-.5px}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero p.lead{font-size:16px;opacity:.92;max-width:46ch;margin:0 0 24px}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+.hero-stats{display:flex;gap:26px;margin-top:30px;flex-wrap:wrap}
+.hstat b{font-size:26px;display:block}
+.hstat span{font-size:12.5px;opacity:.8}
+.mascot-card{background:#fff;border-radius:22px;padding:18px;box-shadow:0 18px 50px rgba(0,0,0,.25);transform:rotate(2deg);max-width:340px;justify-self:center}
+.mascot-card img{width:100%;border-radius:14px;display:block}
+.mascot-card p{color:var(--nba);font-weight:700;text-align:center;margin:12px 0 2px}
+.mascot-card small{color:var(--mut);display:block;text-align:center}
+
+/* ── sections ── */
+.sec{padding:64px 0}
+.sec-h{text-align:center;max-width:640px;margin:0 auto 36px}
+.sec-h .tag{display:inline-block;font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--nba);background:#E3EFE2;padding:6px 14px;border-radius:999px;margin-bottom:12px}
+.sec-h h2{font-size:30px;margin:0 0 10px;letter-spacing:-.4px}
+.sec-h p{color:var(--mut);margin:0}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:22px;border:1px solid #EDF2EA}
+.card h3{margin:0 0 8px;font-size:17px}
+.card p{margin:0;color:var(--mut);font-size:13.5px}
+.icb{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;font-size:25px;margin-bottom:14px}
+
+/* cara kerja steps */
+.steps{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+.step{background:#fff;border-radius:12px;box-shadow:var(--sh);overflow:hidden;border-top:5px solid var(--nba)}
+.step .n{font-size:11px;font-weight:800;color:#fff;padding:5px 10px;display:inline-block;border-radius:0 0 8px 0}
+.step .b{padding:12px;font-size:12px;color:var(--mut)}
+.step .b b{display:block;color:var(--ink);font-size:13px;margin-bottom:4px}
+
+/* harga */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:22px}
+.tabs button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 20px;font-weight:700;font-size:13.5px;cursor:pointer;color:#3c4a40}
+.tabs button.on{background:var(--nba);border-color:var(--nba);color:#fff}
+.ptable{width:100%;border-collapse:collapse;background:#fff;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.ptable th{background:var(--nba);color:#fff;text-align:left;padding:12px 16px;font-size:13px}
+.ptable td{padding:11px 16px;border-bottom:1px solid #F0F4EE;font-size:13.5px}
+.ptable tr:last-child td{border-bottom:0}
+.ptable td.num{text-align:right;font-weight:700;color:var(--nba);white-space:nowrap}
+.ptable th.num{text-align:right}
+
+/* peta */
+.mapbox{background:#fff;border-radius:18px;box-shadow:var(--sh);overflow:hidden;border:1px solid #EDF2EA}
+.map-legend{display:flex;gap:18px;padding:14px 20px;border-top:1px solid var(--line);font-size:13px;flex-wrap:wrap}
+.dot{width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:6px}
+
+/* berita */
+.news{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.news .card{padding:0;overflow:hidden}
+.news .thumb{height:150px;display:grid;place-items:center;font-size:44px;color:#fff;font-weight:800}
+.news .b{padding:18px}
+.news .date{font-size:12px;color:var(--mut);font-weight:600}
+.news h3{font-size:15.5px;margin:6px 0}
+
+/* footer */
+footer{background:var(--nba-d);color:#DCE8DD;padding:44px 0 26px;margin-top:20px}
+footer .cols{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:26px;margin-bottom:26px}
+footer h4{color:#fff;margin:0 0 10px;font-size:15px}
+footer p,footer li{font-size:13.5px;opacity:.85}
+footer ul{list-style:none;margin:0;padding:0}
+footer li{margin-bottom:7px}
+.copy{border-top:1px solid rgba(255,255,255,.14);padding-top:18px;font-size:12.5px;opacity:.7;text-align:center}
+
+/* ── auth ── */
+.auth{min-height:calc(100vh - 66px);display:grid;place-items:center;padding:40px 18px;background:linear-gradient(135deg,#EAF3E7,#F7FAF5)}
+.auth-card{background:#fff;border-radius:20px;box-shadow:0 14px 44px rgba(22,68,43,.14);padding:36px;width:100%;max-width:430px;text-align:center}
+.auth-card img{height:64px;border-radius:12px;margin-bottom:10px}
+.auth-card h2{margin:6px 0 4px}
+.auth-card p{color:var(--mut);font-size:13.5px;margin:0 0 20px}
+.rolepick{display:grid;gap:12px}
+.rolepick button{display:flex;align-items:center;gap:14px;border:2px solid var(--line);background:#fff;border-radius:14px;padding:16px;cursor:pointer;text-align:left;transition:.15s}
+.rolepick button:hover{border-color:var(--nba);transform:translateY(-1px)}
+.rolepick .ri{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;font-size:23px;flex:0 0 auto}
+.rolepick b{display:block;font-size:15px}
+.rolepick small{color:var(--mut)}
+
+/* ── dashboard ── */
+.dash{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 66px)}
+.side{background:var(--nba-d);color:#CFE0D2;padding:20px 14px;display:flex;flex-direction:column;gap:4px}
+.side .sbrand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px;color:#fff;font-weight:800}
+.side .sbrand img{height:36px;border-radius:8px}
+.slink{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;border:0;background:transparent;color:inherit;width:100%;text-align:left}
+.slink:hover{background:rgba(255,255,255,.08)}
+.slink.on{background:#fff;color:var(--nba-d)}
+.slink .e{font-size:17px}
+.main{padding:26px;max-width:1080px}
+.main h1{margin:0 0 4px;font-size:23px}
+.main .sub{color:var(--mut);font-size:13.5px;margin:0 0 20px}
+.stat4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat{background:#fff;border-radius:var(--r);box-shadow:var(--sh);padding:18px;border-left:5px solid var(--nba)}
+.stat small{color:var(--mut);font-size:12px;font-weight:600}
+.stat b{font-size:24px;display:block;margin-top:4px}
+.panel{background:#fff;border-radius:var(--r);box-shadow:var(--sh);padding:20px;margin-bottom:20px;border:1px solid #EDF2EA}
+.panel h3{margin:0 0 14px;font-size:16px}
+table.data{width:100%;border-collapse:collapse;font-size:13px}
+table.data th{text-align:left;padding:9px 10px;color:var(--mut);font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--line);white-space:nowrap}
+table.data td{padding:10px;border-bottom:1px solid #F1F5EF;white-space:nowrap}
+table.data td:first-child{font-weight:800;color:var(--nba-d);font-size:13.5px;letter-spacing:.3px}
+table.data tr:last-child td{border-bottom:0}
+.pill{display:inline-block;padding:3px 11px;border-radius:999px;font-size:11.5px;font-weight:700}
+.pill.g{background:#E5F4E8;color:#1C6B38}
+.pill.o{background:#FFF3DF;color:#9A5B00}
+.pill.b{background:#E3F0FD;color:#1565C0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.kv:last-child{border-bottom:0}
+.kv b{color:var(--nba)}
+.mobile-note{display:none}
+
+/* === mobile-app nasabah (bottom-tab) === */
+.phone{max-width:440px;margin:6px auto;background:#fff;border-radius:34px;box-shadow:0 24px 70px rgba(22,68,43,.20);overflow:hidden;border:1px solid var(--line);position:relative;min-height:min(880px,calc(100vh - 60px));display:flex;flex-direction:column}
+.apphead{display:flex;align-items:center;justify-content:space-between;padding:22px 22px 10px}
+.hi{font-size:12.5px;color:var(--mut)}
+.who{font-size:19px}
+.applogo{width:52px;height:52px;border-radius:16px;object-fit:cover;box-shadow:0 6px 16px rgba(22,68,43,.18)}
+.appbody{flex:1;overflow-y:auto;padding:6px 16px 110px;background:var(--bg);border-radius:26px 26px 0 0}
+.apptitle{margin:14px 4px 2px;font-size:21px}
+.appsub{margin:0 4px 14px;color:var(--mut);font-size:13px}
+.saldo-hero{background:linear-gradient(135deg,#2E9E52,#16442B);border-radius:26px;color:#fff;padding:20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 14px 30px rgba(22,68,43,.28);margin:8px 0 16px}
+.saldo-hero small{color:#CDE7D2;font-size:12px}
+.saldo-hero .snum{font-size:30px;font-weight:800;margin:4px 0;letter-spacing:.3px}
+.saldo-hero img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.5);flex:0 0 auto}
+.qgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.qgrid button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:14px 4px;font-size:24px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;box-shadow:0 4px 12px rgba(22,68,43,.06)}
+.qgrid button span:last-child{font-size:11px;font-weight:700;color:var(--ink)}
+.qgrid button:active{transform:scale(.95)}
+.molitip{background:linear-gradient(135deg,#FFF9E9,#fff);border:1px solid #F0DFAE}
+.molitip p{font-size:13px;color:#7A5B1E;margin:0}
+.npanel .panel{margin-bottom:16px}
+.npanel .steps{gap:12px;margin-bottom:16px}
+.tabbar{position:absolute;left:14px;right:14px;bottom:14px;background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:26px;display:flex;box-shadow:0 12px 32px rgba(22,68,43,.16);padding:8px;z-index:5}
+.tabbar button{flex:1;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:#9AA5A0;padding:9px 2px;border-radius:18px;cursor:pointer}
+.tabbar button .ti{font-size:21px}
+.tabbar button.on{color:var(--nba-d);background:#E7F3EA}
+.fine{font-size:12.5px;color:var(--mut)}
+.ptabs-app{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 14px;scrollbar-width:none}
+.ptabs-app::-webkit-scrollbar{display:none}
+.ptabs-app button{flex:0 0 auto;border:0;border-radius:999px;padding:10px 18px;font-size:13px;font-weight:700;background:#E9F0E9;color:var(--mut);cursor:pointer}
+.ptabs-app button.on{background:linear-gradient(135deg,#35A85C,#1E6B38);color:#fff;box-shadow:0 6px 14px rgba(46,158,82,.30)}
+.profile-head{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:24px;padding:18px;margin:10px 0 16px;box-shadow:var(--sh)}
+.avatar{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#35A85C,#1E6B38);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;flex:0 0 auto;box-shadow:0 8px 18px rgba(46,158,82,.30)}
+.profile-head b{font-size:17px;display:block}
+.profile-head small{color:var(--mut);font-size:12.5px}
+.profile-head .pill{margin-left:auto}
+.btn-logout{width:100%;background:#fff;color:#C0392B;border:1.5px solid #F0C9C2;border-radius:18px;padding:15px;font-weight:700;font-size:15px;cursor:pointer;margin:2px 0 4px}
+.btn-logout:active{transform:scale(.98)}
+@media(max-width:520px){
+  #view-nasabah{padding:0 !important}
+  .phone{margin:0;border-radius:0;border:0;min-height:100vh;min-height:100dvh;box-shadow:none;max-width:none}
+  .appbody{border-radius:0}
+  .tabbar{left:10px;right:10px;bottom:10px}
+}
+
+/* === animasi & loading === */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pop{0%{transform:scale(.96)}60%{transform:scale(1.02)}100%{transform:scale(1)}}
+.anim-fade{animation:fadeIn .35s ease}
+.anim-up{animation:fadeUp .45s cubic-bezier(.22,.8,.3,1)}
+.anim-pop{animation:pop .35s ease}
+#loader{position:fixed;inset:0;background:rgba(255,255,255,.88);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;z-index:99;opacity:0;transition:opacity .25s}
+#loader.show{opacity:1}
+#loader p{color:var(--nba-d);font-weight:700;margin:0}
+.spin{width:54px;height:54px;border-radius:50%;border:5px solid #DDE9DE;border-top-color:var(--nba);animation:spin .8s linear infinite}
+.tabbar button,.slink,.qgrid button,.ptabs-app button,.rolepick button{transition:background .25s,color .25s,transform .15s,box-shadow .25s}
+.qgrid button:active,.tabbar button:active{transform:scale(.94)}
+.card{transition:transform .25s,box-shadow .25s}
+.card:hover{transform:translateY(-4px)}
+#stepsApp{grid-template-columns:1fr}
+
+/* === modal, wizard, fitur v2 === */
+.modal-ov{position:fixed;inset:0;background:rgba(20,40,25,.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:60;padding:16px;opacity:0;transition:opacity .25s}
+.modal-ov.show{opacity:1}
+.modal{background:#fff;border-radius:24px;max-width:520px;width:100%;max-height:92vh;overflow-y:auto;padding:26px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+.modal h2{margin:0 0 4px;font-size:20px}
+.modal .msub{color:var(--mut);font-size:13px;margin:0 0 18px}
+.modal .mclose{float:right;border:0;background:#F0F4EF;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer}
+.formrow{margin-bottom:12px}
+.formrow label{display:block;font-size:12.5px;font-weight:700;color:var(--mut);margin-bottom:6px}
+.formrow input,.formrow select,.formrow textarea{width:100%;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;font-family:inherit;background:#FBFDFB}
+.formrow input:focus,.formrow select:focus,.formrow textarea:focus{outline:none;border-color:var(--nba)}
+.btnrow{display:flex;gap:10px;margin-top:18px}
+.btnrow .btn{flex:1}
+.linkbtn{border:0;background:none;color:var(--nba);font-weight:700;font-size:13px;cursor:pointer;padding:4px 6px}
+.linkbtn.danger{color:#C0392B}
+/* wizard timbangan */
+.wz-steps{display:flex;gap:6px;margin-bottom:20px}
+.wz-steps span{flex:1;height:6px;border-radius:3px;background:#E7EFE8}
+.wz-steps span.on{background:var(--nba)}
+.scale-display{background:linear-gradient(135deg,#16442B,#0E2F1D);border-radius:20px;color:#fff;text-align:center;padding:30px 20px;margin-bottom:16px}
+.scale-display .wval{font-size:52px;font-weight:800;letter-spacing:1px}
+.scale-display small{color:#9FD0A8;font-size:13px}
+.scanline{height:120px;border-radius:16px;background:linear-gradient(180deg,#EAF4EC,#DCE9DC);position:relative;overflow:hidden;margin-bottom:16px}
+.scanline::after{content:"";position:absolute;left:0;right:0;height:4px;background:var(--nba);box-shadow:0 0 18px var(--nba);animation:scan 1.4s ease-in-out infinite}
+@keyframes scan{0%{top:0}50%{top:calc(100% - 4px)}100%{top:0}}
+.nfc-card{background:linear-gradient(135deg,#1E6B38,#16442B);border-radius:20px;color:#fff;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;cursor:pointer;transition:transform .2s}
+.nfc-card:active{transform:scale(.97)}
+.nfc-card .chip{width:46px;height:34px;border-radius:8px;background:linear-gradient(135deg,#F5D76E,#E8A93D);margin-bottom:14px}
+.nfc-card small{color:#BFE3C6}
+.nfc-card b{font-size:18px;letter-spacing:2px}
+.nfc-ring{position:absolute;right:-30px;top:-30px;width:130px;height:130px;border:18px solid rgba(255,255,255,.08);border-radius:50%}
+@keyframes tapPulse{0%{box-shadow:0 0 0 0 rgba(46,158,82,.5)}100%{box-shadow:0 0 0 26px rgba(46,158,82,0)}}
+.tapped{animation:tapPulse .7s ease-out 2}
+.receipt{background:#fff;border:1px dashed #B9C9BC;border-radius:6px;padding:22px;font-family:ui-monospace,monospace;font-size:13px}
+.receipt h3{text-align:center;margin:0 0 2px;font-family:inherit}
+.receipt .rc{text-align:center;color:var(--mut);font-size:11px;margin-bottom:14px}
+.receipt .rrow{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dotted #E2EAE2}
+.receipt .rtotal{display:flex;justify-content:space-between;font-weight:800;font-size:16px;padding:10px 0 4px;font-family:inherit}
+@media print{
+  body *{visibility:hidden}
+  #printArea, #printArea *{visibility:visible}
+  #printArea{position:absolute;left:0;top:0;width:100%}
+  .noprint{display:none !important}
+}
+/* notifikasi */
+.bellwrap{position:relative}
+.bell{border:0;background:#fff;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;box-shadow:var(--sh);position:relative}
+.bell .bdg{position:absolute;top:-4px;right:-4px;background:#E53935;color:#fff;font-size:10px;font-weight:800;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+.notif-drawer{position:fixed;top:0;right:0;bottom:0;width:min(380px,92vw);background:#fff;z-index:70;box-shadow:-20px 0 60px rgba(0,0,0,.2);transform:translateX(105%);transition:transform .3s cubic-bezier(.22,.8,.3,1);display:flex;flex-direction:column}
+.notif-drawer.show{transform:none}
+.notif-drawer .nh{padding:20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.notif-drawer .nb{flex:1;overflow-y:auto;padding:12px 16px}
+.notif-item{border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px;background:#FBFDFB}
+.notif-item.unread{border-color:var(--nba);background:#F2F9F3}
+.notif-item b{font-size:14px;display:block;margin-bottom:4px}
+.notif-item p{font-size:13px;color:var(--mut);margin:0 0 6px}
+.notif-item small{font-size:11px;color:#9AA5A0}
+/* misc v2 */
+.kasgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:18px}
+.kascard{background:#fff;border-radius:18px;padding:16px;border:1px solid var(--line);box-shadow:var(--sh)}
+.kascard small{color:var(--mut);font-size:12px;font-weight:600}
+.kascard b{font-size:21px;display:block;margin-top:4px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.toolbar input,.toolbar select{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;font-family:inherit}
+.offline-bar{background:#FFF3E0;border:1px solid #F5C97B;color:#8A5A00;border-radius:14px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:600}
+.switch{position:relative;width:46px;height:26px;flex:0 0 auto}
+.switch input{opacity:0;width:0;height:0}
+.switch .sl{position:absolute;inset:0;background:#CBD5CB;border-radius:13px;transition:.25s;cursor:pointer}
+.switch .sl:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.25s}
+.switch input:checked + .sl{background:var(--nba)}
+.switch input:checked + .sl:before{transform:translateX(20px)}
+.histitem{border-left:3px solid var(--nba);padding:10px 14px;margin-bottom:10px;background:#FBFDFB;border-radius:0 12px 12px 0;font-size:13px}
+.histitem small{color:var(--mut)}
+
+/* === kartu anggota === */
+.mcard{background:linear-gradient(135deg,#20703C,#0E3B20);border-radius:18px;padding:18px;color:#fff;box-shadow:var(--sh);position:relative;overflow:hidden}
+.mcard::after{content:"";position:absolute;right:-44px;top:-44px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.07)}
+.mcard-top{display:flex;align-items:center;gap:12px;margin-bottom:16px;position:relative;z-index:1}
+.mcard-logo{width:44px;height:44px;border-radius:12px;object-fit:cover;background:#fff}
+.mcard-brand b{display:block;font-size:14px;letter-spacing:2px}
+.mcard-brand span{font-size:11px;color:#CDE7D2}
+.mcard-body{display:flex;align-items:center;justify-content:space-between;gap:14px;position:relative;z-index:1}
+.mcard-info div{margin-bottom:10px}
+.mcard-info div:last-child{margin-bottom:0}
+.mcard-info small{display:block;font-size:10.5px;color:#BFE0C6;letter-spacing:.5px;text-transform:uppercase}
+.mcard-info b{font-size:15.5px}
+.mcard-qr{background:#fff;border:0;border-radius:14px;padding:10px 10px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .15s;-webkit-tap-highlight-color:transparent}
+.mcard-qr:active{transform:scale(.95)}
+.mcard-qr canvas{width:104px;height:104px;image-rendering:pixelated;display:block}
+.mcard-qr small{font-size:10px;color:#5A6B5E}
+
+/* === peta Leaflet === */
+.leaflet-box{height:380px;border-radius:18px;overflow:hidden;box-shadow:var(--sh);z-index:1}
+.lpin{width:38px;height:38px;border-radius:50%;border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:9px;letter-spacing:.3px}
+.lpin.pulse{animation:lpinPulse 2.2s ease-out infinite}
+@keyframes lpinPulse{0%{box-shadow:0 0 0 0 rgba(46,158,79,.55)}70%{box-shadow:0 0 0 16px rgba(46,158,79,0)}100%{box-shadow:0 0 0 0 rgba(46,158,79,0)}}
+.leaflet-popup-content{font-family:inherit !important;margin:14px 16px !important}
+.leaflet-popup-content b{font-size:14px}
+
+/* === nasabah desktop full-width === */
+@media(min-width:900px){
+  #view-nasabah{padding:26px 18px}
+  .phone{max-width:1020px;border-radius:28px;min-height:0}
+  .apphead{order:0;padding:26px 32px 4px}
+  .tabbar{order:1;position:static;margin:12px 32px 0;left:auto;right:auto;bottom:auto;border-radius:20px}
+  .tabbar button{flex-direction:row;justify-content:center;gap:8px;font-size:13px;padding:13px 8px}
+  .tabbar button .ti{font-size:19px}
+  .appbody{order:2;border-radius:0;background:transparent;padding:22px 32px 32px}
+  #np-beranda{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  #np-beranda .saldo-hero{grid-column:1/-1;margin:2px 0 2px}
+  #np-beranda .qgrid{grid-column:1/-1;margin-bottom:2px}
+  #np-beranda .panel{margin-bottom:0}
+  #stepsApp{grid-template-columns:1fr 1fr !important}
+  .npanel .panel{margin-bottom:16px}
+  #np-beranda .panel{margin-bottom:0}
+}
+
+@media(max-width:900px){
+  .hero-in{grid-template-columns:1fr;padding:40px 18px}
+  .mascot-card{max-width:260px}
+  .grid3,.grid4,.news{grid-template-columns:1fr}
+  .steps{grid-template-columns:repeat(2,1fr)}
+  .dash{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr}
+  .main{min-width:0;overflow-x:hidden}
+  .kascard b{white-space:nowrap;font-size:17px}
+  .stat b{font-size:21px}
+  .side{flex-direction:row;overflow-x:auto;padding:10px;gap:8px;align-items:center;scrollbar-width:none}
+  .side::-webkit-scrollbar{display:none}
+  .side .sbrand{display:none}
+  .slink{width:auto;flex:0 0 auto;white-space:nowrap;padding:10px 14px;font-size:13px}
+  .stat4{grid-template-columns:repeat(2,1fr)}
+  .two{grid-template-columns:1fr}
+  .nav-links{display:none}
+  footer .cols{grid-template-columns:1fr}
+  .panel{overflow-x:auto}
+  .main table.data{min-width:560px}
+  .main{padding:18px 14px}
+}
+
+
+
+/* ── siklus sampah ── */
+.cycle{display:flex;align-items:stretch;margin-top:6px}
+.cstep{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 18px;position:relative;box-shadow:var(--sh)}
+.cic{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:28px;margin-bottom:12px}
+.cnum{position:absolute;top:14px;right:14px;font-size:11.5px;font-weight:800;color:var(--mut);background:#F1F5EF;border-radius:99px;padding:3px 10px}
+.cstep h3{margin:0 0 8px;font-size:16px}
+.cstep p{margin:0;color:var(--mut);font-size:13.5px;line-height:1.65}
+.carr{align-self:center;flex:0 0 auto;font-size:24px;color:var(--leaf);font-weight:800;padding:0 8px;animation:arrP 1.6s ease-in-out infinite}
+@keyframes arrP{0%,100%{transform:translateX(0);opacity:.45}50%{transform:translateX(7px);opacity:1}}
+.cycle-close{margin-top:18px;background:#EAF7EE;border:1px dashed var(--leaf);border-radius:16px;padding:15px 20px;text-align:center;color:var(--nba-d);font-size:14px;line-height:1.6}
+.rv{opacity:0;transform:translateY(26px);transition:opacity .6s ease,transform .6s ease}
+.rv.on{opacity:1;transform:none}
+@media(max-width:900px){
+  .cycle{flex-direction:column}
+  .cstep{flex:none}
+  .carr{transform:rotate(90deg);padding:2px 0;align-self:center}
+  @keyframes arrP{0%,100%{transform:rotate(90deg) translateX(0);opacity:.45}50%{transform:rotate(90deg) translateX(7px);opacity:1}}
+}
+
+/* ── artikel berita ── */
+.art-hero{height:150px;border-radius:18px;display:flex;align-items:center;justify-content:center;position:relative;margin:-4px -4px 18px;overflow:hidden}
+.art-icon{font-size:64px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.28));animation:artFloat 3s ease-in-out infinite}
+@keyframes artFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.art-date{position:absolute;bottom:12px;left:14px;background:rgba(255,255,255,.94);padding:6px 14px;border-radius:99px;font-size:12px;font-weight:800;color:var(--nba-d);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.art-kicker{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1.2px;color:var(--leaf);text-transform:uppercase;margin-bottom:8px}
+.art-title{font-size:22px;line-height:1.35;margin:0 0 14px;color:var(--ink)}
+.art-lead{font-size:15px;line-height:1.7;color:var(--ink);font-weight:600;margin:0 0 12px}
+.art-body{font-size:14px;line-height:1.8;color:var(--mut);margin:0 0 6px}
+.art-cta{margin-top:18px;background:#F0F7F1;border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;font-size:13.5px;color:var(--nba-d)}
+.art-cta button{margin-left:auto;flex:0 0 auto;background:var(--nba);color:#fff;border:0;border-radius:99px;padding:9px 18px;font-weight:700;font-size:13px;cursor:pointer}
+.art-x{position:absolute;top:14px;right:14px;z-index:5;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.96);box-shadow:0 3px 12px rgba(0,0,0,.22);font-size:18px;line-height:1;cursor:pointer;color:#2b2b2b}
+.modal{position:relative}
+</style>
+<style>
+/* required styles */
+
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	}
+.leaflet-container {
+	overflow: hidden;
+	}
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	        user-select: none;
+	  -webkit-user-drag: none;
+	}
+/* Prevents IE11 from highlighting tiles in blue */
+.leaflet-tile::selection {
+	background: transparent;
+}
+/* Safari renders non-retina tile on retina better with this, but Chrome is worse */
+.leaflet-safari .leaflet-tile {
+	image-rendering: -webkit-optimize-contrast;
+	}
+/* hack that prevents hw layers "stretching" when loading new tiles */
+.leaflet-safari .leaflet-tile-container {
+	width: 1600px;
+	height: 1600px;
+	-webkit-transform-origin: 0 0;
+	}
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	display: block;
+	}
+/* .leaflet-container svg: reset svg max-width decleration shipped in Joomla! (joomla.org) 3.x */
+/* .leaflet-container img: map is broken in FF if you have max-width: 100% on tiles */
+.leaflet-container .leaflet-overlay-pane svg {
+	max-width: none !important;
+	max-height: none !important;
+	}
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile {
+	max-width: none !important;
+	max-height: none !important;
+	width: auto;
+	padding: 0;
+	}
+
+.leaflet-container img.leaflet-tile {
+	/* See: https://bugs.chromium.org/p/chromium/issues/detail?id=600120 */
+	mix-blend-mode: plus-lighter;
+}
+
+.leaflet-container.leaflet-touch-zoom {
+	-ms-touch-action: pan-x pan-y;
+	touch-action: pan-x pan-y;
+	}
+.leaflet-container.leaflet-touch-drag {
+	-ms-touch-action: pinch-zoom;
+	/* Fallback for FF which doesn't support pinch-zoom */
+	touch-action: none;
+	touch-action: pinch-zoom;
+}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {
+	-ms-touch-action: none;
+	touch-action: none;
+}
+.leaflet-container {
+	-webkit-tap-highlight-color: transparent;
+}
+.leaflet-container a {
+	-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
+}
+.leaflet-tile {
+	filter: inherit;
+	visibility: hidden;
+	}
+.leaflet-tile-loaded {
+	visibility: inherit;
+	}
+.leaflet-zoom-box {
+	width: 0;
+	height: 0;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	z-index: 800;
+	}
+/* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */
+.leaflet-overlay-pane svg {
+	-moz-user-select: none;
+	}
+
+.leaflet-pane         { z-index: 400; }
+
+.leaflet-tile-pane    { z-index: 200; }
+.leaflet-overlay-pane { z-index: 400; }
+.leaflet-shadow-pane  { z-index: 500; }
+.leaflet-marker-pane  { z-index: 600; }
+.leaflet-tooltip-pane   { z-index: 650; }
+.leaflet-popup-pane   { z-index: 700; }
+
+.leaflet-map-pane canvas { z-index: 100; }
+.leaflet-map-pane svg    { z-index: 200; }
+
+.leaflet-vml-shape {
+	width: 1px;
+	height: 1px;
+	}
+.lvml {
+	behavior: url(#default#VML);
+	display: inline-block;
+	position: absolute;
+	}
+
+
+/* control positioning */
+
+.leaflet-control {
+	position: relative;
+	z-index: 800;
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+.leaflet-top,
+.leaflet-bottom {
+	position: absolute;
+	z-index: 1000;
+	pointer-events: none;
+	}
+.leaflet-top {
+	top: 0;
+	}
+.leaflet-right {
+	right: 0;
+	}
+.leaflet-bottom {
+	bottom: 0;
+	}
+.leaflet-left {
+	left: 0;
+	}
+.leaflet-control {
+	float: left;
+	clear: both;
+	}
+.leaflet-right .leaflet-control {
+	float: right;
+	}
+.leaflet-top .leaflet-control {
+	margin-top: 10px;
+	}
+.leaflet-bottom .leaflet-control {
+	margin-bottom: 10px;
+	}
+.leaflet-left .leaflet-control {
+	margin-left: 10px;
+	}
+.leaflet-right .leaflet-control {
+	margin-right: 10px;
+	}
+
+
+/* zoom and fade animations */
+
+.leaflet-fade-anim .leaflet-popup {
+	opacity: 0;
+	-webkit-transition: opacity 0.2s linear;
+	   -moz-transition: opacity 0.2s linear;
+	        transition: opacity 0.2s linear;
+	}
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+	opacity: 1;
+	}
+.leaflet-zoom-animated {
+	-webkit-transform-origin: 0 0;
+	    -ms-transform-origin: 0 0;
+	        transform-origin: 0 0;
+	}
+svg.leaflet-zoom-animated {
+	will-change: transform;
+}
+
+.leaflet-zoom-anim .leaflet-zoom-animated {
+	-webkit-transition: -webkit-transform 0.25s cubic-bezier(0,0,0.25,1);
+	   -moz-transition:    -moz-transform 0.25s cubic-bezier(0,0,0.25,1);
+	        transition:         transform 0.25s cubic-bezier(0,0,0.25,1);
+	}
+.leaflet-zoom-anim .leaflet-tile,
+.leaflet-pan-anim .leaflet-tile {
+	-webkit-transition: none;
+	   -moz-transition: none;
+	        transition: none;
+	}
+
+.leaflet-zoom-anim .leaflet-zoom-hide {
+	visibility: hidden;
+	}
+
+
+/* cursors */
+
+.leaflet-interactive {
+	cursor: pointer;
+	}
+.leaflet-grab {
+	cursor: -webkit-grab;
+	cursor:    -moz-grab;
+	cursor:         grab;
+	}
+.leaflet-crosshair,
+.leaflet-crosshair .leaflet-interactive {
+	cursor: crosshair;
+	}
+.leaflet-popup-pane,
+.leaflet-control {
+	cursor: auto;
+	}
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-grab .leaflet-interactive,
+.leaflet-dragging .leaflet-marker-draggable {
+	cursor: move;
+	cursor: -webkit-grabbing;
+	cursor:    -moz-grabbing;
+	cursor:         grabbing;
+	}
+
+/* marker & overlays interactivity */
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-image-layer,
+.leaflet-pane > svg path,
+.leaflet-tile-container {
+	pointer-events: none;
+	}
+
+.leaflet-marker-icon.leaflet-interactive,
+.leaflet-image-layer.leaflet-interactive,
+.leaflet-pane > svg path.leaflet-interactive,
+svg.leaflet-image-layer.leaflet-interactive path {
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+
+/* visual tweaks */
+
+.leaflet-container {
+	background: #ddd;
+	outline-offset: 1px;
+	}
+.leaflet-container a {
+	color: #0078A8;
+	}
+.leaflet-zoom-box {
+	border: 2px dotted #38f;
+	background: rgba(255,255,255,0.5);
+	}
+
+
+/* general typography */
+.leaflet-container {
+	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	}
+
+
+/* general toolbar styles */
+
+.leaflet-bar {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+	border-radius: 4px;
+	}
+.leaflet-bar a {
+	background-color: #fff;
+	border-bottom: 1px solid #ccc;
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	display: block;
+	text-align: center;
+	text-decoration: none;
+	color: black;
+	}
+.leaflet-bar a,
+.leaflet-control-layers-toggle {
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	display: block;
+	}
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+	background-color: #f4f4f4;
+	}
+.leaflet-bar a:first-child {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	}
+.leaflet-bar a:last-child {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	border-bottom: none;
+	}
+.leaflet-bar a.leaflet-disabled {
+	cursor: default;
+	background-color: #f4f4f4;
+	color: #bbb;
+	}
+
+.leaflet-touch .leaflet-bar a {
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	}
+.leaflet-touch .leaflet-bar a:first-child {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+	}
+.leaflet-touch .leaflet-bar a:last-child {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	}
+
+/* zoom control */
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+	font: bold 18px 'Lucida Console', Monaco, monospace;
+	text-indent: 1px;
+	}
+
+.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out  {
+	font-size: 22px;
+	}
+
+
+/* layers control */
+
+.leaflet-control-layers {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	}
+.leaflet-control-layers-toggle {
+	background-image: url(images/layers.png);
+	width: 36px;
+	height: 36px;
+	}
+.leaflet-retina .leaflet-control-layers-toggle {
+	background-image: url(images/layers-2x.png);
+	background-size: 26px 26px;
+	}
+.leaflet-touch .leaflet-control-layers-toggle {
+	width: 44px;
+	height: 44px;
+	}
+.leaflet-control-layers .leaflet-control-layers-list,
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+	display: none;
+	}
+.leaflet-control-layers-expanded .leaflet-control-layers-list {
+	display: block;
+	position: relative;
+	}
+.leaflet-control-layers-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+	}
+.leaflet-control-layers-scrollbar {
+	overflow-y: scroll;
+	overflow-x: hidden;
+	padding-right: 5px;
+	}
+.leaflet-control-layers-selector {
+	margin-top: 2px;
+	position: relative;
+	top: 1px;
+	}
+.leaflet-control-layers label {
+	display: block;
+	font-size: 13px;
+	font-size: 1.08333em;
+	}
+.leaflet-control-layers-separator {
+	height: 0;
+	border-top: 1px solid #ddd;
+	margin: 5px -10px 5px -6px;
+	}
+
+/* Default icon URLs */
+.leaflet-default-icon-path { /* used only in path-guessing heuristic, see L.Icon.Default */
+	background-image: url(images/marker-icon.png);
+	}
+
+
+/* attribution and scale controls */
+
+.leaflet-container .leaflet-control-attribution {
+	background: #fff;
+	background: rgba(255, 255, 255, 0.8);
+	margin: 0;
+	}
+.leaflet-control-attribution,
+.leaflet-control-scale-line {
+	padding: 0 5px;
+	color: #333;
+	line-height: 1.4;
+	}
+.leaflet-control-attribution a {
+	text-decoration: none;
+	}
+.leaflet-control-attribution a:hover,
+.leaflet-control-attribution a:focus {
+	text-decoration: underline;
+	}
+.leaflet-attribution-flag {
+	display: inline !important;
+	vertical-align: baseline !important;
+	width: 1em;
+	height: 0.6669em;
+	}
+.leaflet-left .leaflet-control-scale {
+	margin-left: 5px;
+	}
+.leaflet-bottom .leaflet-control-scale {
+	margin-bottom: 5px;
+	}
+.leaflet-control-scale-line {
+	border: 2px solid #777;
+	border-top: none;
+	line-height: 1.1;
+	padding: 2px 5px 1px;
+	white-space: nowrap;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	background: rgba(255, 255, 255, 0.8);
+	text-shadow: 1px 1px #fff;
+	}
+.leaflet-control-scale-line:not(:first-child) {
+	border-top: 2px solid #777;
+	border-bottom: none;
+	margin-top: -2px;
+	}
+.leaflet-control-scale-line:not(:first-child):not(:last-child) {
+	border-bottom: 2px solid #777;
+	}
+
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	box-shadow: none;
+	}
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	border: 2px solid rgba(0,0,0,0.2);
+	background-clip: padding-box;
+	}
+
+
+/* popup */
+
+.leaflet-popup {
+	position: absolute;
+	text-align: center;
+	margin-bottom: 20px;
+	}
+.leaflet-popup-content-wrapper {
+	padding: 1px;
+	text-align: left;
+	border-radius: 12px;
+	}
+.leaflet-popup-content {
+	margin: 13px 24px 13px 20px;
+	line-height: 1.3;
+	font-size: 13px;
+	font-size: 1.08333em;
+	min-height: 1px;
+	}
+.leaflet-popup-content p {
+	margin: 17px 0;
+	margin: 1.3em 0;
+	}
+.leaflet-popup-tip-container {
+	width: 40px;
+	height: 20px;
+	position: absolute;
+	left: 50%;
+	margin-top: -1px;
+	margin-left: -20px;
+	overflow: hidden;
+	pointer-events: none;
+	}
+.leaflet-popup-tip {
+	width: 17px;
+	height: 17px;
+	padding: 1px;
+
+	margin: -10px auto 0;
+	pointer-events: auto;
+
+	-webkit-transform: rotate(45deg);
+	   -moz-transform: rotate(45deg);
+	    -ms-transform: rotate(45deg);
+	        transform: rotate(45deg);
+	}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+	background: white;
+	color: #333;
+	box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+	}
+.leaflet-container a.leaflet-popup-close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: none;
+	text-align: center;
+	width: 24px;
+	height: 24px;
+	font: 16px/24px Tahoma, Verdana, sans-serif;
+	color: #757575;
+	text-decoration: none;
+	background: transparent;
+	}
+.leaflet-container a.leaflet-popup-close-button:hover,
+.leaflet-container a.leaflet-popup-close-button:focus {
+	color: #585858;
+	}
+.leaflet-popup-scrolled {
+	overflow: auto;
+	}
+
+.leaflet-oldie .leaflet-popup-content-wrapper {
+	-ms-zoom: 1;
+	}
+.leaflet-oldie .leaflet-popup-tip {
+	width: 24px;
+	margin: 0 auto;
+
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)";
+	filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678);
+	}
+
+.leaflet-oldie .leaflet-control-zoom,
+.leaflet-oldie .leaflet-control-layers,
+.leaflet-oldie .leaflet-popup-content-wrapper,
+.leaflet-oldie .leaflet-popup-tip {
+	border: 1px solid #999;
+	}
+
+
+/* div icon */
+
+.leaflet-div-icon {
+	background: #fff;
+	border: 1px solid #666;
+	}
+
+
+/* Tooltip */
+/* Base styles for the element that has a tooltip */
+.leaflet-tooltip {
+	position: absolute;
+	padding: 6px;
+	background-color: #fff;
+	border: 1px solid #fff;
+	border-radius: 3px;
+	color: #222;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+	}
+.leaflet-tooltip.leaflet-interactive {
+	cursor: pointer;
+	pointer-events: auto;
+	}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	position: absolute;
+	pointer-events: none;
+	border: 6px solid transparent;
+	background: transparent;
+	content: "";
+	}
+
+/* Directions */
+
+.leaflet-tooltip-bottom {
+	margin-top: 6px;
+}
+.leaflet-tooltip-top {
+	margin-top: -6px;
+}
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-top:before {
+	left: 50%;
+	margin-left: -6px;
+	}
+.leaflet-tooltip-top:before {
+	bottom: 0;
+	margin-bottom: -12px;
+	border-top-color: #fff;
+	}
+.leaflet-tooltip-bottom:before {
+	top: 0;
+	margin-top: -12px;
+	margin-left: -6px;
+	border-bottom-color: #fff;
+	}
+.leaflet-tooltip-left {
+	margin-left: -6px;
+}
+.leaflet-tooltip-right {
+	margin-left: 6px;
+}
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	top: 50%;
+	margin-top: -6px;
+	}
+.leaflet-tooltip-left:before {
+	right: 0;
+	margin-right: -12px;
+	border-left-color: #fff;
+	}
+.leaflet-tooltip-right:before {
+	left: 0;
+	margin-left: -12px;
+	border-right-color: #fff;
+	}
+
+/* Printing */
+
+@media print {
+	/* Prevent printers from removing background-images of controls. */
+	.leaflet-control {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+		}
+	}
+
+</style>
+
+</head>
+<body>
+<!-- ══════════ LANDING ══════════ -->
+<div id="view-landing">
+<nav class="nav"><div class="wrap nav-in">
+  <a class="brand" href="#beranda"><img data-asset="logo" src="" alt="NBA"><span>NBA<small>Next-Gen Barrier-free Automation</small></span></a>
+  <div class="nav-links">
+    <a href="#beranda" class="on">Beranda</a><a href="#cara">Cara Kerja</a><a href="#harga">Harga Sampah</a><a href="#peta">Sebaran</a><a href="#berita">Berita</a>
+  </div>
+  <span style="flex:1"></span>
+  <button class="btn btn-p" onclick="go('masuk')">Masuk</button>
+</div></nav>
+
+<header class="hero" id="beranda"><div class="wrap hero-in">
+  <div>
+    <span class="kick">♻️ NEXT-GEN BARRIER-FREE AUTOMATION · BANK SAMPAH DIGITAL</span>
+    <h1>Setor Sampah, <em>Tap Kartu</em>, Saldo Masuk Otomatis.</h1>
+    <p class="lead">NBA <em style="font-style:normal;font-weight:700">(Next-Gen Barrier-free Automation)</em> menghadirkan timbangan pintar bertenaga AI: sampah ditimbang, jenisnya dikenali kamera, dan nilainya langsung masuk ke saldo kamu. Tanpa antre, tanpa catat manual.</p>
+    <div class="hero-cta">
+      <button class="btn btn-g" onclick="go('masuk')">Mulai Menabung Sampah</button>
+      <button class="btn btn-o" style="border-color:#fff;color:#fff;background:transparent" onclick="goHarga()">Lihat Harga Sampah</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><b>1.248</b><span>Transaksi tercatat</span></div>
+      <div class="hstat"><b>3.542 Kg</b><span>Sampah terkumpul</span></div>
+      <div class="hstat"><b>12</b><span>Titik timbangan</span></div>
+    </div>
+  </div>
+  <div class="mascot-card">
+    <img data-asset="maskot" src="" alt="Maskot NBA">
+    <p>Hai, aku Moli! 🐱</p>
+    <small>Maskot Bank Sampah NBA — ayo pilah sampahmu!</small>
+  </div>
+</div></header>
+
+<section class="sec" id="cara"><div class="wrap">
+  <div class="sec-h"><span class="tag">CARA KERJA</span>
+    <h2>Dari Sampah ke Saldo dalam 7 Langkah</h2>
+    <p>Alur S-cale Smart Scale: timbangan + AI + NFC dalam satu perangkat.</p>
+  </div>
+  <div class="steps" id="steps"></div>
+</div></section>
+
+
+<section class="sec" id="siklus" style="background:#fff"><div class="wrap">
+  <div class="sec-h"><span class="tag">SIKLUS SAMPAH</span>
+    <h2>Dari Warga, Kembali ke Warga</h2>
+    <p>Perjalanan sampah dalam ekosistem NBA — dikumpulkan, ditimbang, diagregasi, lalu diolah industri menjadi produk baru.</p>
+  </div>
+  <div class="cycle">
+    <div class="cstep rv"><span class="cnum">1</span><div class="cic" style="background:#E5F4E8">🏠</div><h3>Warga</h3><p>Warga membawa sampah dari rumah ke titik S-cale terdekat, lalu menyetor dengan kartu NFC — tidak perlu dipilah dulu dari rumah.</p></div>
+    <div class="carr">➜</div>
+    <div class="cstep rv"><span class="cnum">2</span><div class="cic" style="background:#E3F0FD">⚖️</div><h3>Bank Sampah Unit</h3><p>Sampah ditimbang otomatis, lalu AI memilah dan mengklasifikasi jenisnya — plastik, kertas, logam, organik. Nilai rupiah langsung masuk ke saldo tabungan nasabah.</p></div>
+    <div class="carr">➜</div>
+    <div class="cstep rv"><span class="cnum">3</span><div class="cic" style="background:#FFF3DF">🚚</div><h3>Bank Sampah Induk</h3><p>BSU yang penuh dijemput, sampah dikumpulkan dan dipadatkan di bank induk — siap didistribusikan dalam volume besar.</p></div>
+    <div class="carr">➜</div>
+    <div class="cstep rv"><span class="cnum">4</span><div class="cic" style="background:#F1E8FB">🏭</div><h3>Industri</h3><p>Material dibeli industri daur ulang: plastik jadi biji plastik, kertas jadi pulp, logam dilebur kembali menjadi bahan baku.</p></div>
+  </div>
+  <div class="cycle-close rv">♻️ <b>Siklus tertutup:</b> produk daur ulang kembali ke masyarakat, dan nilai ekonominya kembali ke warga sebagai saldo tabungan.</div>
+</div></section>
+
+<section class="sec" id="harga"><div class="wrap">
+  <div class="sec-h"><span class="tag">TRANSPARAN</span>
+    <h2>Harga Sampah per Kg</h2>
+    <p>Harga acuan Bank Sampah Unit Gukub Rukun · diperbarui 25 Agustus 2025. Harga dapat berubah mengikuti pasar.</p>
+  </div>
+  <div class="tabs" id="priceTabs"></div>
+  <div class="wrap" style="max-width:760px"><table class="ptable">
+    <thead><tr><th>Jenis Sampah</th><th>Satuan</th><th class="num">Harga</th></tr></thead>
+    <tbody id="priceBody"></tbody>
+  </table></div>
+</div></section>
+
+<section class="sec" id="peta"><div class="wrap">
+  <div class="sec-h"><span class="tag">SEBARAN</span>
+    <h2>Peta Titik Timbangan</h2>
+    <p>12 titik S-cale tersebar di Surakarta. Hijau = online, merah = offline, kuning = maintenance.</p>
+  </div>
+  <div class="mapbox">
+      <div id="leafletMap" class="leaflet-box"></div>
+      <div class="map-legend">
+        <span><span class="dot" style="background:#2E9E4F"></span>Online</span>
+        <span><span class="dot" style="background:#E53935"></span>Offline</span>
+        <span><span class="dot" style="background:#F9A825"></span>Maintenance</span>
+      </div>
+    </div>
+</div></section>
+
+<section class="sec" id="berita" style="background:#fff"><div class="wrap">
+  <div class="sec-h"><span class="tag">KABAR</span><h2>Berita Terkini</h2><p>Kegiatan dan edukasi seputar pengelolaan sampah.</p></div>
+  <div class="news">
+    <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#2E9E4F,#7CB342)">♻️</div>
+      <div class="b"><span class="date">28 Sep 2026</span><h3>12 Titik S-cale Resmi Beroperasi di Surakarta</h3><p>Serah terima perangkat tahap pertama selesai, 340 warga terdaftar sebagai nasabah.</p></div></div>
+    <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#1E88E5,#64B5F6)">📰</div>
+      <div class="b"><span class="date">15 Sep 2026</span><h3>Harga Kardus Naik, Cek Daftar Terbaru</h3><p>Penyesuaian harga beli sampah kertas mengikuti harga pasar pengepul bulan ini.</p></div></div>
+    <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#F59E0B,#F9A825)">🎓</div>
+      <div class="b"><span class="date">02 Sep 2026</span><h3>Sosialisasi Pilah Sampah di 6 Kelurahan</h3><p>Tim NBA edukasi 500+ warga soal memilah plastik, kertas, dan organik dari rumah.</p></div></div>
+  </div>
+</div></section>
+
+<section class="sec"><div class="wrap">
+  <div class="sec-h"><span class="tag">VISI MISI</span><h2>Kenapa NBA Ada</h2></div>
+  <div class="grid3">
+    <div class="card"><div class="icb" style="background:#E5F4E8">🎯</div><h3>Visi</h3><p>Menjadi bank sampah digital terdepan yang mengubah sampah menjadi kesejahteraan warga.</p></div>
+    <div class="card"><div class="icb" style="background:#E3F0FD">🤝</div><h3>Misi</h3><p>Memudahkan warga menabung sampah lewat teknologi: timbang cerdas, harga transparan, saldo real-time.</p></div>
+    <div class="card"><div class="icb" style="background:#FFF3DF">🌱</div><h3>Dampak</h3><p>3,5 ton sampah teralihkan dari TPA dan Rp 14,2 juta tersalurkan ke nasabah sejak 2025.</p></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="cols">
+    <div><h4>NBA · Next-Gen Barrier-free Automation</h4><p>Bank Sampah Digital — sistem timbangan pintar S-cale: AI + NFC + IoT untuk bank sampah yang transparan dan modern.</p></div>
+    <div><h4>Navigasi</h4><ul><li><a href="#cara">Cara Kerja</a></li><li><a href="#harga">Harga Sampah</a></li><li><a href="#peta">Peta Sebaran</a></li><li><a href="#berita">Berita</a></li></ul></div>
+    <div><h4>Kontak</h4><ul><li>Jl. Bank Sampah No. 1, Surakarta</li><li>0812-3456-7890</li><li>halo@nba-banksampah.id</li></ul></div>
+  </div>
+  <div class="copy">© 2026 NBA (Next-Gen Barrier-free Automation) · Prototipe</div>
+</div></footer>
+</div>
+<!-- ══════════ LOGIN ══════════ -->
+<div id="view-masuk" style="display:none">
+<nav class="nav"><div class="wrap nav-in">
+  <a class="brand" href="#beranda" onclick="go('landing')"><img data-asset="logo" src="" alt="NBA"><span>NBA<small>Next-Gen Barrier-free Automation</small></span></a>
+</div></nav>
+<div class="auth"><div class="auth-card">
+  <img data-asset="logo" src="" alt="NBA">
+  <h2>Masuk ke NBA</h2><p>Masuk dengan akun nasabah atau admin.</p>
+  <div class="formrow"><label>Username / ID Nasabah</label><input id="liUser" placeholder="cth: NBA-2026-0042 atau admin" autocomplete="username"></div>
+  <div class="formrow"><label>Password</label><input id="liPass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+  <div class="btnrow"><button class="btn btn-p" style="flex:1" onclick="doLogin()">Masuk</button></div>
+  <p class="fine" style="margin-top:10px">Akun demo — nasabah: <b>NBA-2026-0042</b> / nasabah123 · admin: <b>admin</b> / admin123</p>
+  
+  <p style="margin:16px 0 0;font-size:13.5px;color:var(--mut)">Belum punya akun? <a href="javascript:void(0)" onclick="openRegister()" style="color:var(--nba);font-weight:700">Daftar sebagai nasabah</a></p>
+  <p style="margin:10px 0 0"><a href="#beranda" onclick="go('landing')" style="color:var(--nba);font-weight:700">← Kembali ke beranda</a></p>
+</div></div>
+</div>
+
+<!-- ══════════ DASHBOARD NASABAH ══════════ -->
+<div id="view-nasabah" style="display:none;background:linear-gradient(180deg,#E9F4EB,#F7FAF6);min-height:100vh;padding:18px 12px">
+<div class="phone">
+  <div class="apphead">
+    <div><div class="hi">Selamat datang kembali</div><b class="who">Andi</b></div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="bellwrap"><button class="bell" onclick="toggleNotif(true)">🔔<span class="bdg" id="bellBdg" style="display:none">0</span></button></div>
+      <img data-asset="logo" src="" alt="NBA" class="applogo">
+    </div>
+  </div>
+  <div class="appbody">
+    <div class="npanel" id="np-beranda">
+      <div class="saldo-hero">
+        <div><small>Saldo Aktif</small><div class="snum">Rp 125.000</div><small>28,5 Kg disetor &middot; 24 transaksi</small></div>
+        <img data-asset="maskot" src="" alt="Moli">
+      </div>
+      <div class="qgrid">
+        <button onclick="showNp('setor')"><span class="qe">⚖️</span><span>Setor</span></button>
+        <button onclick="showNp('riwayat')"><span class="qe">🧾</span><span>Riwayat</span></button>
+        <button onclick="showNp('harga')"><span class="qe">💲</span><span>Harga</span></button>
+        <button onclick="showNp('akun')"><span class="qe">👤</span><span>Akun</span></button>
+      </div>
+      <div class="panel"><h3>Setoran Terakhir</h3>
+        <table class="data"><tbody>
+          <tr><td data-label="Waktu">Hari ini &middot; 10.05</td><td data-label="Kategori">Plastik PET</td><td data-label="Total" style="text-align:right"><b>Rp 7.050</b></td></tr>
+          <tr><td data-label="Waktu">Kemarin &middot; 16.20</td><td data-label="Kategori">Kardus</td><td data-label="Total" style="text-align:right"><b>Rp 3.000</b></td></tr>
+        </tbody></table>
+      </div>
+      <div class="panel molitip"><h3>Tips dari Moli</h3><p>Pisahkan tutup botol dari badannya &mdash; tutup punya harga sendiri lho, Rp 2.500/kg!</p></div>
+    </div>
+    <div class="npanel" id="np-setor" style="display:none">
+      <h2 class="apptitle">Setor Sampah</h2>
+      <p class="appsub">Ikuti langkahnya di timbangan S-cale terdekat.</p>
+      <div class="panel" style="background:linear-gradient(135deg,#1E6B38,#16442B);border:0;color:#fff">
+        <h3 style="color:#fff">⚖️ Simulasi Timbangan</h3>
+        <p style="color:#CDE7D2;font-size:13px;margin:0 0 14px">Coba alur lengkap: timbang &rarr; deteksi AI &rarr; tap NFC &rarr; konfirmasi.</p>
+        <button class="btn" style="background:#fff;color:var(--nba-d);width:100%;border-radius:16px;padding:13px;font-weight:800" onclick="openSimulasi()">Mulai Simulasi</button>
+      </div>
+      <div class="steps" id="stepsApp"></div>
+      <div class="panel"><h3>Stasiun Terdekat</h3>
+        <div class="kv"><span>ST-01 &middot; Bank Sampah Gukub Rukun</span><span class="pill g">Online</span></div>
+        <div class="kv"><span>Kadipiro &middot; &plusmn; 0,8 km</span><b>Buka setiap hari</b></div>
+      </div>
+    </div>
+    <div class="npanel" id="np-riwayat" style="display:none">
+      <h2 class="apptitle">Riwayat Setoran</h2>
+      <p class="appsub">Semua transaksi tercatat permanen.</p>
+      <div class="panel"><table class="data"><thead><tr><th>Tanggal</th><th>Kategori</th><th>Berat</th><th style="text-align:right">Total</th></tr></thead><tbody id="nasabahRows"></tbody></table></div>
+    </div>
+    <div class="npanel" id="np-harga" style="display:none">
+      <h2 class="apptitle">Harga Sampah</h2>
+      <p class="appsub">Diperbarui 1 Okt 2026 &middot; Bank Induk Surakarta</p>
+      <div class="ptabs-app" id="priceTabsApp"></div>
+      <div class="panel"><table class="data"><thead><tr><th>Jenis</th><th style="text-align:right">Harga / Kg</th></tr></thead><tbody id="priceBodyApp"></tbody></table></div>
+    </div>
+    <div class="npanel" id="np-akun" style="display:none">
+      <div class="profile-head">
+        <div class="avatar">A</div>
+        <div><b>Andi</b><small data-user-id>NBA-2026-0042</small></div>
+        <span class="pill g">Aktif</span>
+      </div>
+      <div class="panel"><h3>💸 Tarik Saldo</h3>
+        <div class="kv"><span>Saldo tersedia</span><b class="snum2">Rp 125.000</b></div>
+        <div class="formrow"><input id="wdAmount" type="number" min="10000" step="5000" placeholder="Jumlah (min Rp 10.000)"></div>
+        <div class="formrow"><select id="wdMethod"><option>Tunai di BSU</option><option>Transfer Bank</option></select></div>
+        <button class="btn btn-p" style="width:100%" onclick="doWithdraw()">Tarik Sekarang</button>
+        <p class="fine">Penarikan tunai diambil di BSU terdekat dengan menunjukkan kartu NFC.</p>
+      </div>
+      <div class="panel" style="padding:0;border:0;background:transparent;box-shadow:none"><h3>📱 Kartu Anggota</h3>
+        <div class="mcard">
+          <div class="mcard-top">
+            <img data-asset="logo" src="" alt="NBA" class="mcard-logo">
+            <div class="mcard-brand"><b>KARTU ANGGOTA</b><span>Bank Sampah Digital</span></div>
+            <span class="pill g" style="margin-left:auto">Aktif</span>
+          </div>
+          <div class="mcard-body">
+            <div class="mcard-info">
+              <div><small>Nama Nasabah</small><b class="who">Andi</b></div>
+              <div><small>ID Nasabah</small><b data-user-id>NBA-2026-0042</b></div>
+              <div><small>ID Kartu NFC</small><b data-nfc-id>NFC-2026-0042</b></div>
+            </div>
+            <button class="mcard-qr" onclick="zoomQR()" aria-label="Perbesar QR">
+              <canvas id="qrCanvas" width="252" height="252"></canvas>
+              <small>🔍 Ketuk untuk memperbesar</small>
+            </button>
+          </div>
+        </div>
+        <p class="fine" style="margin:10px 4px 0">Tunjukkan QR ke operator sebagai alternatif kartu NFC.</p>
+      </div>
+      <div class="panel"><h3>💳 Kartu NFC Saya</h3>
+        <div class="kv"><span>ID Kartu</span><b data-nfc-id>NFC-2026-0042</b></div>
+        <div class="kv"><span>Status</span><span class="pill g">Aktif</span></div>
+        <div class="kv"><span>Terdaftar sejak</span><b data-user-sejak>14 Agu 2026</b></div>
+        <p class="fine">Tempelkan kartu ini ke timbangan S-cale sebelum menimbang sampah.</p>
+      </div>
+      <div class="panel"><h3>👤 Profil</h3>
+        <div class="kv"><span>Nama</span><b class="who">Andi</b></div>
+        <div class="kv"><span>ID Nasabah</span><b data-user-id>NBA-2026-0042</b></div>
+        <div class="kv"><span>Telepon</span><b data-user-tel>0812••••4521</b></div>
+      </div>
+      <button class="btn-logout" onclick="logout()">Keluar dari akun</button>
+      <p class="fine" style="text-align:center;margin-top:14px">NBA Bank Sampah Digital &middot; demo v1.0</p>
+    </div>
+  </div>
+  <nav class="tabbar">
+    <button class="on" data-np="beranda" onclick="showNp('beranda')"><span class="ti">🏠</span><span>Beranda</span></button>
+    <button data-np="setor" onclick="showNp('setor')"><span class="ti">⚖️</span><span>Setor</span></button>
+    <button data-np="riwayat" onclick="showNp('riwayat')"><span class="ti">🧾</span><span>Riwayat</span></button>
+    <button data-np="harga" onclick="showNp('harga')"><span class="ti">💲</span><span>Harga</span></button>
+    <button data-np="akun" onclick="showNp('akun')"><span class="ti">👤</span><span>Akun</span></button>
+  </nav>
+</div>
+</div>
+
+<!-- ══════════ DASHBOARD ADMIN ══════════ -->
+<div id="view-admin" style="display:none">
+<div class="dash">
+  <aside class="side">
+    <div class="sbrand"><img data-asset="logo" src="" alt=""> NBA Admin</div>
+    <button class="slink on" data-ap="dash"><span class="e">📊</span>Dashboard</button>
+    <button class="slink" data-ap="peta"><span class="e">🗺️</span>Peta Timbangan</button>
+    <button class="slink" data-ap="trx"><span class="e">🧾</span>Transaksi</button>
+    <button class="slink" data-ap="stasiun"><span class="e">⚙️</span>Data Stasiun</button>
+    <button class="slink" data-ap="harga"><span class="e">💲</span>Data Harga</button>
+    <button class="slink" data-ap="lap"><span class="e">📑</span>Laporan</button>
+    <button class="slink" data-ap="berita"><span class="e">📰</span>Berita</button>
+    <span style="flex:1"></span>
+    <button class="slink" onclick="go('landing')"><span class="e">🚪</span>Keluar</button>
+  </aside>
+  <div class="main">
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-bottom:4px">
+      <span style="font-size:12.5px;color:var(--mut)">Super Admin</span>
+      <div class="bellwrap"><button class="bell" onclick="toggleNotif(true)">🔔<span class="bdg" id="bellBdgAdmin" style="display:none">0</span></button></div>
+    </div>
+    <div id="ap-dash">
+      <h1>Dashboard</h1><p class="sub">Ringkasan operasional seluruh titik timbangan · real-time</p>
+      <div class="stat4">
+        <div class="stat" style="border-color:var(--blue)"><small>🏭 Total Stasiun</small><b>12</b></div>
+        <div class="stat" style="border-color:var(--leaf)"><small>🧾 Total Transaksi</small><b>1.248</b></div>
+        <div class="stat" style="border-color:var(--orange)"><small>⚖️ Total Berat</small><b>3.542 Kg</b></div>
+        <div class="stat" style="border-color:var(--purple)"><small>💰 Total Nilai</small><b>Rp 14,28 jt</b></div>
+      </div>
+      <div class="panel"><h3>💰 Arus Kas BSU</h3>
+        <div id="offlineBadge" class="offline-bar" style="display:none">📴 Mode Offline — <span id="offlineCount">0</span> transaksi menunggu sync <button class="btn btn-p" style="padding:8px 16px;font-size:13px;margin-left:auto" onclick="syncOutbox()">Sync Sekarang</button></div>
+        <div class="kasgrid">
+          <div class="kascard"><small>💵 Tunai di Kas</small><b id="kasTunai">Rp 0</b></div>
+          <div class="kascard"><small>🧾 Utang Saldo Nasabah</small><b id="kasUtang">Rp 0</b></div>
+          <div class="kascard"><small>📥 Masuk Hari Ini</small><b id="kasMasuk">Rp 0</b></div>
+          <div class="kascard"><small>📤 Keluar Hari Ini</small><b id="kasKeluar">Rp 0</b></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <label class="switch"><input type="checkbox" id="offlineToggle" onchange="setOffline(this.checked)"><span class="sl"></span></label>
+          <span style="font-size:13.5px;font-weight:600">Mode Offline (simulasi internet mati)</span>
+          <span style="flex:1"></span>
+          <button class="btn btn-o" style="padding:9px 18px;font-size:13px" onclick="kasTerima()">+ Terima dari Pengepul</button>
+        </div>
+      </div>
+      <div class="panel"><h3>🧾 Transaksi Terbaru</h3>
+        <table class="data"><thead><tr><th>Waktu</th><th>User</th><th>Stasiun</th><th>Kategori</th><th>Berat</th><th style="text-align:right">Total</th></tr></thead>
+        <tbody id="adminRows"></tbody></table>
+      </div>
+    </div>
+    <div id="ap-peta" style="display:none">
+      <h1>Peta Lokasi Timbangan</h1><p class="sub">Status perangkat IoT per titik</p>
+      <div class="mapbox">
+      <div id="leafletMapAdmin" class="leaflet-box"></div>
+      <div class="map-legend">
+        <span><span class="dot" style="background:#2E9E4F"></span>Online</span>
+        <span><span class="dot" style="background:#E53935"></span>Offline</span>
+        <span><span class="dot" style="background:#F9A825"></span>Maintenance</span>
+      </div>
+    </div>
+    </div>
+    <div id="ap-trx" style="display:none">
+      <h1>Transaksi</h1><p class="sub">Semua transaksi setoran nasabah</p>
+      <div class="toolbar">
+        <input id="fSearch" placeholder="🔍 Cari nama / kategori / ID…" oninput="filterTrx()" style="flex:1;min-width:160px">
+        <select id="fStasiun" onchange="filterTrx()"><option value="">Semua Stasiun</option></select>
+        <select id="fTipe" onchange="filterTrx()"><option value="">Semua Tipe</option><option value="setor">Setoran</option><option value="tarik">Penarikan</option></select>
+        <button class="btn btn-o" style="padding:10px 18px;font-size:13px" onclick="exportCSV()">⬇ Export CSV</button>
+      </div>
+      <div class="panel"><table class="data"><thead><tr><th>Waktu</th><th>User</th><th>Stasiun</th><th>Kategori</th><th>Berat</th><th>Harga/Kg</th><th style="text-align:right">Total</th><th>Status</th></tr></thead>
+      <tbody id="adminRows2"></tbody></table></div>
+    </div>
+    <div id="ap-stasiun" style="display:none">
+      <h1>Data Stasiun</h1><p class="sub">Perangkat S-cale terdaftar</p>
+      <div class="toolbar"><span style="flex:1"></span><button class="btn btn-p" style="padding:10px 20px;font-size:13.5px" onclick="stasiunForm()">+ Tambah Stasiun</button></div>
+      <div class="panel"><table class="data"><thead><tr><th>ID</th><th>Nama</th><th>Lokasi</th><th>Status</th><th>Transaksi Hr Ini</th><th style="text-align:right">Aksi</th></tr></thead>
+      <tbody id="stasiunRows"></tbody></table></div>
+    </div>
+    <div id="ap-harga" style="display:none">
+      <h1>Data Harga Sampah</h1><p class="sub">Harga beli per jenis — berlaku untuk semua stasiun</p>
+      <div class="toolbar"><span style="flex:1"></span><button class="btn btn-p" style="padding:10px 20px;font-size:13.5px" onclick="hargaForm()">+ Tambah Harga</button></div>
+      <div class="panel"><table class="data"><thead><tr><th>Kategori</th><th>Jenis</th><th style="text-align:right">Harga/Kg</th><th>Berlaku Sejak</th></tr></thead>
+      <tbody id="hargaRows"></tbody>
+      </table></div>
+      <div class="panel"><h3>🕘 Riwayat Perubahan Harga</h3><div id="historiBody"></div></table>
+      <p style="font-size:12.5px;color:var(--mut)">ⓘ Perubahan harga hanya berlaku untuk transaksi baru; riwayat transaksi mengunci harga saat terjadi.</p></div>
+    </div>
+    <div id="ap-berita" style="display:none">
+      <h1>Kelola Berita</h1><p class="sub">Berita & edukasi yang tampil di landing page</p>
+      <div class="toolbar"><span style="flex:1"></span><button class="btn btn-p" style="padding:10px 20px;font-size:13.5px" onclick="beritaForm()">+ Tulis Berita</button></div>
+      <div class="panel"><table class="data"><thead><tr><th>Tanggal</th><th>Judul</th><th style="text-align:right">Aksi</th></tr></thead><tbody id="beritaRows"></tbody></table></div>
+    </div>
+    <div id="ap-lap" style="display:none">
+      <h1>Laporan</h1><p class="sub">Rekap periode berjalan</p>
+      <div class="toolbar"><span style="flex:1"></span>
+        <button class="btn btn-o" style="padding:10px 18px;font-size:13px" onclick="exportCSV()">⬇ Export Transaksi (CSV)</button>
+        <button class="btn btn-p" style="padding:10px 18px;font-size:13px" onclick="exportLaporan()">🖨 Cetak / PDF</button>
+      </div>
+      <div class="two">
+        <div class="panel"><h3>🏆 Nasabah Teratas</h3><table class="data"><thead><tr><th>#</th><th>Nama</th><th style="text-align:right">Total Kg</th></tr></thead>
+          <tbody id="topNasabah"></tbody></table></div>
+        <div class="panel"><h3>📦 Komposisi Sampah</h3>
+          <div id="komposisi"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="modal-ov" id="modalOv"><div class="modal" id="modalBox"></div></div>
+<div class="notif-drawer" id="notifDrawer">
+  <div class="nh"><b style="font-size:17px">Notifikasi</b><button class="mclose" onclick="toggleNotif(false)">&times;</button></div>
+  <div class="nb" id="notifBody"></div>
+</div>
+<div id="printArea" style="display:none"></div>
+<div id="loader"><div class="spin"></div><p>Memuat data&hellip;</p></div>
+<script src="vendor/leaflet.js"></script>
+<script src="assets/logo.js"></script>
+<script src="assets/maskot.js"></script>
+<script>
+document.querySelectorAll("img[data-asset]").forEach(function(i){
+  i.src = i.dataset.asset === "logo" ? ASSET_LOGO : ASSET_MASKOT;
+});
+</script>
+<script src="app.js"></script>
+</body>
+</html>
