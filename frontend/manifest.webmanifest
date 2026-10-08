@@ -1,0 +1,31 @@
+{
+  "background_color": "#F2F7F2",
+  "description": "Bank sampah digital S-cale — setor sampah, pantau saldo, tukar manfaat.",
+  "display": "standalone",
+  "icons": [
+    {
+      "sizes": "192x192",
+      "src": "icons/icon-192.png",
+      "type": "image/png"
+    },
+    {
+      "sizes": "512x512",
+      "src": "icons/icon-512.png",
+      "type": "image/png"
+    },
+    {
+      "purpose": "maskable",
+      "sizes": "512x512",
+      "src": "icons/maskable-512.png",
+      "type": "image/png"
+    }
+  ],
+  "id": "./",
+  "lang": "id",
+  "name": "NBA Bank Sampah Digital",
+  "orientation": "portrait",
+  "scope": "./",
+  "short_name": "NBA",
+  "start_url": "./",
+  "theme_color": "#2E9E4F"
+}
