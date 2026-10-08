@@ -49,8 +49,8 @@ module.exports = function transaksiRoutes(db) {
         return res.status(400).json({ error: 'saldo tidak cukup', saldo: user.saldo });
       }
       db.prepare('UPDATE users SET saldo = saldo - ? WHERE id = ?').run(jumlah, user.id);
-      db.prepare(`INSERT INTO transaksi(id, tgl, user_id, nama, tipe, total, status)
-                  VALUES (?,?,?,?, 'tarik', ?, 'Selesai')`).run(id, tgl, user.id, user.nama, -jumlah);
+      db.prepare(`INSERT INTO transaksi(id, tgl, user_id, nama, tipe, total, metode, status)
+                  VALUES (?,?,?,?, 'tarik', ?, ?, 'Selesai')`).run(id, tgl, user.id, user.nama, -jumlah, b.metode || null);
       db.prepare('UPDATE kas SET tunai = tunai - ? WHERE id = 1').run(jumlah);
       return res.status(201).json({ ok: true, id, saldo_baru: user.saldo - jumlah });
     }
@@ -72,9 +72,9 @@ module.exports = function transaksiRoutes(db) {
     db.prepare('UPDATE users SET saldo = saldo + ?, total_kg = total_kg + ?, trx_count = trx_count + 1 WHERE id = ?')
       .run(total, beratNum, user.id);
     db.prepare('UPDATE stasiun SET trx_hari = trx_hari + 1 WHERE id = ?').run(stasiun_id);
-    db.prepare(`INSERT INTO transaksi(id, tgl, user_id, nama, stasiun_id, kategori, item, berat, harga, satuan, total, tipe, status)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?, 'setor', 'Selesai')`)
-      .run(id, tgl, user.id, user.nama, stasiun_id, kategori, item, beratNum, h.harga, h.satuan, total);
+    db.prepare(`INSERT INTO transaksi(id, tgl, user_id, nama, stasiun_id, kategori, item, berat, harga, satuan, total, tipe, metode, status)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?, 'setor', ?, 'Selesai')`)
+      .run(id, tgl, user.id, user.nama, stasiun_id, kategori, item, beratNum, h.harga, h.satuan, total, b.metode || null);
     res.status(201).json({ ok: true, id, total, saldo_baru: user.saldo + total });
   });
 

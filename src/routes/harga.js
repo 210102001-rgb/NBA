@@ -19,6 +19,35 @@ module.exports = function hargaRoutes(db) {
     res.json({ riwayat: rows });
   });
 
+  /* Admin: tambah item harga baru. */
+  r.post('/', requireAdmin, (req, res) => {
+    const { kategori, item, harga, satuan } = req.body || {};
+    if (!kategori || !item || harga === undefined) {
+      return res.status(400).json({ error: 'kategori, item, harga wajib' });
+    }
+    if (!Number.isInteger(harga) || harga <= 0) {
+      return res.status(400).json({ error: 'harga harus bilangan bulat > 0' });
+    }
+    try {
+      db.prepare('INSERT INTO harga(kategori, item, harga, satuan) VALUES (?,?,?,?)')
+        .run(kategori, item, harga, satuan || 'Kg');
+    } catch (e) {
+      return res.status(409).json({ error: 'item sudah ada di kategori ini' });
+    }
+    const tgl = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    db.prepare(`INSERT INTO harga_riwayat(tgl, kategori, item, harga_lama, harga_baru, alasan)
+                VALUES (?,?,?,?,?,?)`).run(tgl, kategori, item, 0, harga, 'Item baru ditambahkan');
+    res.status(201).json({ ok: true });
+  });
+
+  /* Admin: hapus item harga. */
+  r.delete('/', requireAdmin, (req, res) => {
+    const { kategori, item } = req.query;
+    if (!kategori || !item) return res.status(400).json({ error: 'kategori & item wajib' });
+    const info = db.prepare('DELETE FROM harga WHERE kategori = ? AND item = ?').run(kategori, item);
+    if (info.changes === 0) return res.status(404).json({ error: 'item tidak ditemukan' });
+    res.json({ ok: true });
+  });
   /* Admin: ubah harga satu item; harga lama otomatis masuk riwayat. */
   r.put('/', requireAdmin, (req, res) => {
     const { kategori, item, harga_baru, alasan } = req.body || {};

@@ -53,6 +53,7 @@ const MIGRATIONS = [
    CREATE TABLE IF NOT EXISTS kas(
      id INTEGER PRIMARY KEY CHECK (id = 1), tunai INTEGER NOT NULL DEFAULT 0
    );`,
+  `ALTER TABLE transaksi ADD COLUMN metode TEXT;`,
 ];
 
 function migrate(db) {

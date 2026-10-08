@@ -155,3 +155,37 @@ test('logout: session hangus', async () => {
   const me2 = await get('/api/auth/me', { cookie: l.cookie });
   assert.equal(me2.status, 401);
 });
+
+test('register: nasabah baru langsung login', async () => {
+  const bad = await post('/api/auth/register', { body: { nama: 'X', tel: '0812', password: '123456' } });
+  assert.equal(bad.status, 400);
+  const r = await post('/api/auth/register', { body: { nama: 'Dewi', tel: '081234567890', alamat: 'Solo', password: 'rahasia1' } });
+  assert.equal(r.status, 201);
+  assert.ok(r.data.user.id.startsWith('NBA-2026-'));
+  assert.ok(r.cookie, 'register langsung login (cookie)');
+  const me = await get('/api/auth/me', { cookie: r.cookie });
+  assert.equal(me.data.user.nama, 'Dewi');
+  const w = await post('/api/transaksi', { cookie: r.cookie, body: { tipe: 'tarik', jumlah: 1000, metode: 'Transfer Bank' } });
+  assert.equal(w.status, 400); // saldo 0
+});
+
+test('harga: tambah & hapus item (admin)', async () => {
+  const c = await post('/api/harga', { cookie: globalThis.__admin, body: { kategori: 'Logam', item: 'Aki Bekas', harga: 5000, satuan: 'buah' } });
+  assert.equal(c.status, 201);
+  const dupe = await post('/api/harga', { cookie: globalThis.__admin, body: { kategori: 'Logam', item: 'Aki Bekas', harga: 5000 } });
+  assert.equal(dupe.status, 409);
+  const r = await get('/api/harga');
+  assert.ok(r.data.harga.Logam.some((x) => x.item === 'Aki Bekas' && x.satuan === 'buah'));
+  const d = await del('/api/harga?kategori=Logam&item=Aki%20Bekas', { cookie: globalThis.__admin });
+  assert.equal(d.status, 200);
+  const gone = await del('/api/harga?kategori=Logam&item=Aki%20Bekas', { cookie: globalThis.__admin });
+  assert.equal(gone.status, 404);
+});
+
+test('transaksi: metode tersimpan', async () => {
+  const w = await post('/api/transaksi', { cookie: globalThis.__nasabah, body: { tipe: 'tarik', jumlah: 10000, metode: 'Tunai di BSU' } });
+  assert.equal(w.status, 201);
+  const list = await get('/api/transaksi', { cookie: globalThis.__nasabah });
+  const t = list.data.transaksi.find((x) => x.id === w.data.id);
+  assert.equal(t.metode, 'Tunai di BSU');
+});
