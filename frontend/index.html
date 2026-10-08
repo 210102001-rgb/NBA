@@ -203,6 +203,15 @@ table.data tr:last-child td{border-bottom:0}
   .tabbar{left:10px;right:10px;transform:none;width:auto;bottom:calc(10px + env(safe-area-inset-bottom))}
 }
 
+/* === banner install PWA === */
+.pwa-banner{display:none;align-items:center;gap:12px;background:linear-gradient(135deg,#1E6B38,#35A85C);color:#fff;border-radius:20px;padding:14px 16px;margin:14px 0;box-shadow:0 10px 24px rgba(30,107,56,.35);position:relative}
+.pwa-banner .pwa-ic{font-size:30px;flex:0 0 auto}
+.pwa-banner b{display:block;font-size:14.5px}
+.pwa-banner span{font-size:12.5px;opacity:.88}
+.pwa-banner .btn{margin-left:auto;flex:0 0 auto;background:#fff;color:#1E6B38;border:0;padding:10px 18px}
+.pwa-x{position:absolute;top:4px;right:8px;background:none;border:0;color:#fff;opacity:.75;font-size:19px;cursor:pointer;line-height:1;padding:6px}
+@media(display-mode:standalone){.pwa-banner{display:none !important}}
+
 /* === animasi & loading === */
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
@@ -1097,6 +1106,12 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <small>Maskot Bank Sampah NBA — ayo pilah sampahmu!</small>
   </div>
 </div></header>
+<div class="wrap"><div id="pwaBanner" class="pwa-banner">
+  <div class="pwa-ic">📲</div>
+  <div><b>Pasang aplikasi NBA</b><span id="pwaSub">Buka lebih cepat, tampil seperti aplikasi asli.</span></div>
+  <button class="btn" id="pwaBtn" onclick="installPWA()">Pasang</button>
+  <button class="pwa-x" onclick="dismissPWA()" aria-label="Tutup">×</button>
+</div></div>
 
 <section class="sec" id="cara"><div class="wrap">
   <div class="sec-h"><span class="tag">CARA KERJA</span>
