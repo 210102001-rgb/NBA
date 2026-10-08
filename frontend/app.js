@@ -38,7 +38,7 @@ const apiDel = p => api(p, { method: "DELETE" });
 /* --- mapping bentuk server -> bentuk aplikasi --- */
 const mapStasiun = s => ({ id: s.id, nama: s.nama, lokasi: s.lokasi, status: s.status, alamat: s.alamat, jam: s.jam, lat: s.lat, lng: s.lng, trxHari: s.trx_hari || 0 });
 function mapHarga(h){ const o = {}; for(const k of Object.keys(h || {})) o[k] = h[k].map(x => [x.item, x.harga, x.satuan]); return o; }
-const mapBerita = b => ({ _id: b.id, tgl: b.tgl, judul: b.judul, isi: b.isi, warna: b.warna, icon: b.icon });
+const mapBerita = b => ({ _id: b.id, tgl: b.tgl, judul: b.judul, isi: b.isi, warna: b.warna, icon: b.icon, gambar: b.gambar || "" });
 const mapTrx = t => ({ id: t.id, tgl: t.tgl, userId: t.user_id, nama: t.nama, stasiun: t.stasiun_id, kategori: t.kategori, item: t.item, berat: t.berat, harga: t.harga, satuan: t.satuan, total: t.total, tipe: t.tipe, metode: t.metode, status: t.status });
 const mapUser = u => ({ id: u.id, username: u.username, nama: u.nama, role: u.role, tel: u.tel, nfc: u.nfc, saldo: u.saldo || 0, totalKg: u.total_kg || 0, trx: u.trx_count || 0, sejak: u.sejak, aktif: !!u.aktif });
 
@@ -239,7 +239,7 @@ function renderBerita(){
   const el = document.querySelector("#berita .news");
   if(!el) return;
   el.innerHTML = DB.berita.map((b,i)=>
-    `<div class="card" onclick="openBerita(${i})" style="cursor:pointer"><div class="thumb" style="background:${b.warna}">${b.icon}</div><div class="b"><span class="date">${b.tgl}</span><h3>${b.judul}</h3><p>${b.isi}</p></div></div>`).join("");
+    `<div class="card" onclick="openBerita(${i})" style="cursor:pointer"><div class="thumb" style="background:${b.warna}">${b.gambar?`<img src="${b.gambar.replace(/"/g,"&quot;")}" style="width:100%;height:100%;object-fit:cover;display:block" alt="">`:b.icon}</div><div class="b"><span class="date">${b.tgl}</span><h3>${b.judul}</h3><p>${b.isi}</p></div></div>`).join("");
 }
 
 /* reveal on scroll */
@@ -253,7 +253,7 @@ function openBerita(i){
   const b = DB.berita[i];
   if(!b) return;
   openModal('<button class="art-x" onclick="closeModal()">\u00D7</button>'
-    + '<div class="art-hero" style="background:' + b.warna + '"><span class="art-icon">' + b.icon + '</span><span class="art-date">\uD83D\uDCC5 ' + b.tgl + '</span></div>'
+    + '<div class="art-hero" style="background:' + b.warna + (b.gambar ? ';background-image:url(' + b.gambar.replace(/'/g,"") + ');background-size:cover;background-position:center' : '') + '">' + (b.gambar ? '' : '<span class="art-icon">' + b.icon + '</span>') + '<span class="art-date">\uD83D\uDCC5 ' + b.tgl + '</span></div>'
     + '<span class="art-kicker">Kabar NBA</span>'
     + '<h2 class="art-title">' + b.judul + '</h2>'
     + '<p class="art-lead">' + b.isi + '</p>'
@@ -268,7 +268,11 @@ function renderNasabah(){
   document.querySelectorAll(".who").forEach(e=>e.textContent = u.nama);
   const snum = document.querySelector(".snum");
   if(snum) snum.textContent = rp(u.saldo);
-  const rows = DB.transaksi.filter(t=>t.userId===u.id && t.tipe==="setor").slice(0,8);
+  const q = (document.getElementById("riwayatCari")||{}).value || "";
+  const qn = q.trim().toLowerCase();
+  let rows = DB.transaksi.filter(t=>t.userId===u.id && t.tipe==="setor");
+  if(qn) rows = rows.filter(t=>[t.tgl, t.kategori, String(t.berat), String(t.total)].join(" ").toLowerCase().includes(qn));
+  else rows = rows.slice(0,8);
   const nr = document.getElementById("nasabahRows");
   if(nr) nr.innerHTML = rows.map(t=>`<tr onclick="showTrxDetail('${t.id}')" style="cursor:pointer"><td data-label="Tanggal">${t.tgl}</td><td data-label="Kategori">${t.kategori}</td><td data-label="Berat">${String(t.berat).replace(".",",")} ${t.satuan||"Kg"}</td><td data-label="Total" style="text-align:right;font-weight:700">${rp(t.total)}</td></tr>`).join("") || `<tr><td colspan="4" style="text-align:center;color:var(--mut)">Belum ada setoran.</td></tr>`;
   document.querySelectorAll("[data-nfc-id]").forEach(e=>e.textContent = u.nfc);
@@ -894,6 +898,26 @@ async function delHarga(cat, nama){
   }catch(e){ alert("Gagal menghapus: " + e.message); return; }
   renderAll();
 }
+function gantiPassForm(){
+  openModal(`<button class="mclose" onclick="closeModal()">\u00D7</button>
+    <h2>Ganti Password</h2><p class="msub">Password baru minimal 6 karakter.</p>
+    <div class="formrow"><label>Password lama</label><input id="gpLama" type="password" autocomplete="current-password"></div>
+    <div class="formrow"><label>Password baru</label><input id="gpBaru" type="password" autocomplete="new-password"></div>
+    <div class="formrow"><label>Ulangi password baru</label><input id="gpBaru2" type="password" autocomplete="new-password"></div>
+    <div class="btnrow"><button class="btn btn-o" onclick="closeModal()">Batal</button>
+    <button class="btn btn-p" onclick="saveGantiPass()">Simpan</button></div>`);
+}
+async function saveGantiPass(){
+  const lama = document.getElementById("gpLama").value;
+  const baru = document.getElementById("gpBaru").value;
+  const baru2 = document.getElementById("gpBaru2").value;
+  if(!lama || !baru){ alert("Isi password lama dan baru."); return; }
+  if(baru !== baru2){ alert("Konfirmasi password baru tidak sama."); return; }
+  try{ await apiPost("/auth/ganti-password", { lama, baru }); }
+  catch(e){ alert("Gagal: " + e.message); return; }
+  closeModal();
+  alert("Password berhasil diganti.");
+}
 function beritaForm(i){
   const b = (i===undefined||i===null) ? {tgl:fmtTgl().split(" \u00B7 ")[0], judul:"", isi:"", warna:"linear-gradient(135deg,#2E9E4F,#7CB342)", icon:"\u{0001F4F0}"} : DB.berita[i];
   const palet = ["linear-gradient(135deg,#2E9E4F,#7CB342)","linear-gradient(135deg,#1E88E5,#64B5F6)","linear-gradient(135deg,#F59E0B,#F9A825)","linear-gradient(135deg,#8E24AA,#BA68C8)","linear-gradient(135deg,#E53935,#EF9A9A)"];
@@ -901,6 +925,7 @@ function beritaForm(i){
     <h2>${i==null?"Tulis":"Ubah"} Berita</h2><p class="msub">Tampil di landing page.</p>
     <div class="formrow"><label>Judul</label><input id="brJudul" value="${b.judul.replace(/"/g,"&quot;")}"></div>
     <div class="formrow"><label>Isi</label><textarea id="brIsi" rows="3">${b.isi}</textarea></div>
+    <div class="formrow"><label>Gambar <span style="font-weight:400">(link foto, opsional)</span></label><input id="brGambar" value="${(b.gambar||"").replace(/"/g,"&quot;")}" placeholder="https://…" oninput="document.getElementById('brPrev').src=this.value;document.getElementById('brPrev').style.display=this.value?'block':'none'"><img id="brPrev" src="${(b.gambar||"").replace(/"/g,"&quot;")}" style="display:${b.gambar?"block":"none"};width:100%;height:120px;object-fit:cover;border-radius:10px;margin-top:8px"></div>
     <div class="formrow"><label>Warna kartu</label><div class="swatches" id="brSwatches">${palet.map(p=>`<button type="button" class="sw${p===b.warna?" on":""}" data-w="${p}" style="background:${p}" onclick="pickWarna(this)" title="${p}"></button>`).join("")}</div><input type="hidden" id="brWarna" value="${b.warna}"></div>
     <div class="btnrow"><button class="btn btn-o" onclick="closeModal()">Batal</button>
     <button class="btn btn-p" onclick="saveBerita(${i==null?"null":i})">Simpan</button></div>`);
@@ -915,7 +940,8 @@ async function saveBerita(i){
   const isi = document.getElementById("brIsi").value.trim();
   if(!judul || !isi){ alert("Judul dan isi wajib diisi."); return; }
   const b = { tgl: fmtTgl().split(" · ")[0], judul: judul, isi: isi,
-    warna: document.getElementById("brWarna").value, icon: "📰" };
+    warna: document.getElementById("brWarna").value, icon: "\u{0001F4F0}",
+    gambar: document.getElementById("brGambar").value.trim() };
   try{
     if(i == null) await apiPost("/berita", b);
     else await apiPut("/berita/" + DB.berita[i]._id, b);
