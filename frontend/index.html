@@ -1181,7 +1181,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <div class="auth"><div class="auth-card">
   <img data-asset="logo" src="" alt="NBA">
   <h2>Masuk ke NBA</h2><p>Masuk dengan akun nasabah atau admin.</p>
-  <div class="formrow"><label>Username / ID Nasabah</label><input id="liUser" placeholder="cth: NBA-2026-0042 atau admin" autocomplete="username"></div>
+  <div class="formrow"><label>Username / ID / No. HP</label><input id="liUser" placeholder="cth: NBA-2026-0042, 0812xxxx, atau admin" autocomplete="username"></div>
   <div class="formrow"><label>Password</label><input id="liPass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
   <div class="btnrow"><button class="btn btn-p" style="flex:1" onclick="doLogin()">Masuk</button></div>
   <p class="fine" style="margin-top:10px">Akun demo — nasabah: <b>NBA-2026-0042</b> / nasabah123 · admin: <b>admin</b> / admin123</p>
@@ -1238,6 +1238,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="npanel" id="np-riwayat" style="display:none">
       <h2 class="apptitle">Riwayat Setoran</h2>
       <p class="appsub">Semua transaksi tercatat permanen.</p>
+      <div class="panel" style="margin-bottom:10px"><input id="riwayatCari" placeholder="🔍 Cari tanggal / kategori / berat…" oninput="renderNasabah()" style="width:100%"></div>
       <div class="panel"><table class="data"><thead><tr><th>Tanggal</th><th>Kategori</th><th>Berat</th><th style="text-align:right">Total</th></tr></thead><tbody id="nasabahRows"></tbody></table></div>
     </div>
     <div class="npanel" id="np-harga" style="display:none">
@@ -1291,6 +1292,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         <div class="kv"><span>ID Nasabah</span><b data-user-id>NBA-2026-0042</b></div>
         <div class="kv"><span>Telepon</span><b data-user-tel>0812••••4521</b></div>
       </div>
+      <button class="btn btn-o" style="width:100%;margin-bottom:10px" onclick="gantiPassForm()">🔑 Ganti Password</button>
       <button class="btn-logout" onclick="logout()">Keluar dari akun</button>
       <p class="fine" style="text-align:center;margin-top:14px">NBA Bank Sampah Digital &middot; demo v1.0</p>
     </div>
@@ -1319,7 +1321,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <button class="slink" data-ap="lap"><span class="e">📑</span>Laporan</button>
     <button class="slink" data-ap="berita"><span class="e">📰</span>Berita</button>
     <span style="flex:1"></span>
-    <button class="slink" onclick="go('landing')"><span class="e">🚪</span>Keluar</button>
+    <button class="slink" onclick="gantiPassForm()"><span class="e">🔑</span>Ganti Password</button>
+<button class="slink" onclick="go('landing')"><span class="e">🚪</span>Keluar</button>
   </aside>
   <div class="main">
     <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-bottom:4px">
