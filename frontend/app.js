@@ -707,11 +707,37 @@ function stasiunForm(id){
     <div class="formrow"><label>Kecamatan</label><input id="stLokasi" value="${(s.lokasi||"").replace(/"/g,"&quot;")}"></div>
     <div class="formrow"><label>Alamat</label><input id="stAlamat" value="${(s.alamat||"").replace(/"/g,"&quot;")}"></div>
     <div class="formrow"><label>Jam operasional</label><input id="stJam" value="${(s.jam||"").replace(/"/g,"&quot;")}"></div>
-    <div class="formrow"><label>Latitude</label><input id="stLat" type="number" step="any" value="${s.lat ?? ''}" placeholder="cth: -7.5680"></div>
-    <div class="formrow"><label>Longitude</label><input id="stLng" type="number" step="any" value="${s.lng ?? ''}" placeholder="cth: 110.8250"></div>
+    <div class="formrow"><label>Titik lokasi <span style="font-weight:400;color:var(--mut)">— klik peta untuk menandai</span></label><div id="stMapPick" style="height:230px;border-radius:12px;border:1px solid var(--line)"></div></div>
+    <input type="hidden" id="stLat" value="${s.lat ?? ''}">
+    <input type="hidden" id="stLng" value="${s.lng ?? ''}">
     <div class="formrow"><label>Status</label><select id="stStatus">${["Online","Offline","Maintenance"].map(x=>`<option ${x===s.status?"selected":""}>${x}</option>`).join("")}</select></div>
     <div class="btnrow"><button class="btn btn-o" onclick="closeModal()">Batal</button>
     <button class="btn btn-p" onclick="saveStasiun('${id||""}')">Simpan</button></div>`);
+  setTimeout(()=>initStasiunMapPick(id || null), 80);
+}
+let stPickMap = null, stPickMarker = null;
+function initStasiunMapPick(id){
+  const el = document.getElementById("stMapPick");
+  if(!el || typeof L === "undefined") return;
+  if(stPickMap){ stPickMap.remove(); stPickMap = null; stPickMarker = null; }
+  const cur = id ? DB.stasiun.find(x=>x.id===id) : null;
+  const lat = (cur && cur.lat != null) ? cur.lat : SKA_CENTER[0];
+  const lng = (cur && cur.lng != null) ? cur.lng : SKA_CENTER[1];
+  stPickMap = L.map("stMapPick", { scrollWheelZoom: false }).setView([lat, lng], 13);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(stPickMap);
+  DB.stasiun.forEach(o=>{
+    if(o.lat == null || (cur && o.id === cur.id)) return;
+    L.circleMarker([o.lat, o.lng], { radius: 5, color: "#888", weight: 1, fillOpacity: .5 }).addTo(stPickMap).bindTooltip(o.id);
+  });
+  const setLL = (la, ln)=>{
+    document.getElementById("stLat").value = la.toFixed(6);
+    document.getElementById("stLng").value = ln.toFixed(6);
+    if(stPickMarker) stPickMarker.setLatLng([la, ln]);
+    else stPickMarker = L.marker([la, ln]).addTo(stPickMap);
+  };
+  if(cur && cur.lat != null && cur.lng != null) setLL(cur.lat, cur.lng);
+  stPickMap.on("click", e=>{ setLL(e.latlng.lat, e.latlng.lng); stPickMap.scrollWheelZoom.enable(); });
+  setTimeout(()=>{ if(stPickMap) stPickMap.invalidateSize(); }, 150);
 }
 async function saveStasiun(id){
   const nama = document.getElementById("stNama").value.trim();
@@ -830,9 +856,14 @@ function beritaForm(i){
     <h2>${i==null?"Tulis":"Ubah"} Berita</h2><p class="msub">Tampil di landing page.</p>
     <div class="formrow"><label>Judul</label><input id="brJudul" value="${b.judul.replace(/"/g,"&quot;")}"></div>
     <div class="formrow"><label>Isi</label><textarea id="brIsi" rows="3">${b.isi}</textarea></div>
-    <div class="formrow"><label>Warna kartu</label><select id="brWarna">${palet.map(p=>`<option ${p===b.warna?"selected":""} value="${p}">${p.slice(0,38)}\u2026</option>`).join("")}</select></div>
+    <div class="formrow"><label>Warna kartu</label><div class="swatches" id="brSwatches">${palet.map(p=>`<button type="button" class="sw${p===b.warna?" on":""}" data-w="${p}" style="background:${p}" onclick="pickWarna(this)" title="${p}"></button>`).join("")}</div><input type="hidden" id="brWarna" value="${b.warna}"></div>
     <div class="btnrow"><button class="btn btn-o" onclick="closeModal()">Batal</button>
     <button class="btn btn-p" onclick="saveBerita(${i==null?"null":i})">Simpan</button></div>`);
+}
+function pickWarna(el){
+  document.querySelectorAll("#brSwatches .sw").forEach(x=>x.classList.remove("on"));
+  el.classList.add("on");
+  document.getElementById("brWarna").value = el.dataset.w;
 }
 async function saveBerita(i){
   const judul = document.getElementById("brJudul").value.trim();
