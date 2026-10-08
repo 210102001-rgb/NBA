@@ -1,0 +1,4 @@
+# Generated PWA icons — do not commit the PNGs.
+# Run `python3 generate.py` (needs Pillow + numpy) to rebuild them,
+# or copy the *.png files to /var/www/nba/icons/ on deploy.
+*.png
