@@ -1238,7 +1238,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="npanel" id="np-riwayat" style="display:none">
       <h2 class="apptitle">Riwayat Setoran</h2>
       <p class="appsub">Semua transaksi tercatat permanen.</p>
-      <div class="panel" style="margin-bottom:10px"><input id="riwayatCari" placeholder="🔍 Cari tanggal / kategori / berat…" oninput="renderNasabah()" style="width:100%"></div>
+      <div class="panel" style="margin-bottom:10px"><div class="formrow" style="margin:0;position:relative"><input id="riwayatCari" placeholder="Cari tanggal / kategori / berat…" oninput="renderNasabah()" style="padding-left:42px"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:17px;pointer-events:none">🔍</span></div></div>
       <div class="panel"><table class="data"><thead><tr><th>Tanggal</th><th>Kategori</th><th>Berat</th><th style="text-align:right">Total</th></tr></thead><tbody id="nasabahRows"></tbody></table></div>
     </div>
     <div class="npanel" id="np-harga" style="display:none">
