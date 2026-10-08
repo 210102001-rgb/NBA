@@ -189,3 +189,36 @@ test('transaksi: metode tersimpan', async () => {
   const t = list.data.transaksi.find((x) => x.id === w.data.id);
   assert.equal(t.metode, 'Tunai di BSU');
 });
+
+test('users: admin ubah + reset password + nonaktif', async () => {
+  const A = globalThis.__admin;
+  // ubah nama
+  const e1 = await put('/api/users/NBA-2026-0031', { cookie: A, body: { nama: 'Budi Santoso' } });
+  assert.equal(e1.status, 200);
+  assert.equal(e1.data.user.nama, 'Budi Santoso');
+  // reset password
+  const e2 = await put('/api/users/NBA-2026-0031', { cookie: A, body: { password: 'baru1234' } });
+  assert.equal(e2.status, 200);
+  const bad = await post('/api/auth/login', { body: { username: 'NBA-2026-0031', password: 'nasabah123' } });
+  assert.equal(bad.status, 401);
+  const good = await post('/api/auth/login', { body: { username: 'NBA-2026-0031', password: 'baru1234' } });
+  assert.equal(good.status, 200);
+  // password terlalu pendek ditolak
+  const e3 = await put('/api/users/NBA-2026-0031', { cookie: A, body: { password: '123' } });
+  assert.equal(e3.status, 400);
+  // nonaktifkan -> login ditolak
+  const e4 = await put('/api/users/NBA-2026-0031', { cookie: A, body: { aktif: false } });
+  assert.equal(e4.status, 200);
+  const off = await post('/api/auth/login', { body: { username: 'NBA-2026-0031', password: 'baru1234' } });
+  assert.equal(off.status, 401);
+  // aktifkan lagi
+  await put('/api/users/NBA-2026-0031', { cookie: A, body: { aktif: true } });
+  const on = await post('/api/auth/login', { body: { username: 'NBA-2026-0031', password: 'baru1234' } });
+  assert.equal(on.status, 200);
+  // admin tidak bisa nonaktifkan diri sendiri
+  const e5 = await put('/api/users/ADMIN-01', { cookie: A, body: { aktif: false } });
+  assert.equal(e5.status, 400);
+  // nasabah tidak boleh
+  const e6 = await put('/api/users/NBA-2026-0038', { cookie: globalThis.__nasabah, body: { nama: 'X' } });
+  assert.equal(e6.status, 403);
+});
