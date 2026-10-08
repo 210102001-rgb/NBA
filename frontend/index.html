@@ -1313,6 +1313,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <button class="slink on" data-ap="dash"><span class="e">📊</span>Dashboard</button>
     <button class="slink" data-ap="peta"><span class="e">🗺️</span>Peta Timbangan</button>
     <button class="slink" data-ap="trx"><span class="e">🧾</span>Transaksi</button>
+    <button class="slink" data-ap="nasabah"><span class="e">👥</span>Nasabah</button>
     <button class="slink" data-ap="stasiun"><span class="e">⚙️</span>Data Stasiun</button>
     <button class="slink" data-ap="harga"><span class="e">💲</span>Data Harga</button>
     <button class="slink" data-ap="lap"><span class="e">📑</span>Laporan</button>
@@ -1374,6 +1375,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
       </div>
       <div class="panel"><table class="data"><thead><tr><th>Waktu</th><th>User</th><th>Stasiun</th><th>Kategori</th><th>Berat</th><th>Harga/Kg</th><th style="text-align:right">Total</th><th>Status</th></tr></thead>
       <tbody id="adminRows2"></tbody></table></div>
+    </div>
+    <div id="ap-nasabah" style="display:none">
+      <h1>Data Nasabah</h1><p class="sub">Kelola akun warga — ubah data, reset password, nonaktifkan</p>
+      <div class="panel"><div style="overflow-x:auto"><table class="data"><thead><tr><th>ID</th><th>Nama</th><th>No. HP</th><th>Saldo</th><th>Total</th><th>Status</th><th style="text-align:right">Aksi</th></tr></thead>
+      <tbody id="userRows"></tbody></table></div></div>
     </div>
     <div id="ap-stasiun" style="display:none">
       <h1>Data Stasiun</h1><p class="sub">Perangkat S-cale terdaftar</p>
