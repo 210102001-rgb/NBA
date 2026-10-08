@@ -1029,6 +1029,42 @@ function filterTrx(){
 
 document.addEventListener("DOMContentLoaded", init);
 /* PWA: daftarkan service worker agar bisa di-install */
+/* PWA: banner install — tampil saat browser menawarkan instalasi */
+let deferredPrompt = null;
+function maybeShowPwa(){
+  const b = document.getElementById("pwaBanner");
+  if(!b || localStorage.getItem("pwa_dismiss")) return;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(isIOS && !navigator.standalone){
+    document.getElementById("pwaSub").textContent = "Ketuk tombol Share lalu \u201CAdd to Home Screen\u201D.";
+    document.getElementById("pwaBtn").style.display = "none";
+    b.style.display = "flex";
+  } else if(deferredPrompt){
+    b.style.display = "flex";
+  }
+}
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  maybeShowPwa();
+});
+window.addEventListener("appinstalled", () => {
+  deferredPrompt = null;
+  const b = document.getElementById("pwaBanner");
+  if(b) b.style.display = "none";
+});
+async function installPWA(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  try{ await deferredPrompt.userChoice; }catch(e){}
+  deferredPrompt = null;
+  document.getElementById("pwaBanner").style.display = "none";
+}
+function dismissPWA(){
+  document.getElementById("pwaBanner").style.display = "none";
+  try{ localStorage.setItem("pwa_dismiss", "1"); }catch(e){}
+}
+document.addEventListener("DOMContentLoaded", maybeShowPwa);
 if("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
   window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(()=>{}); });
 }
