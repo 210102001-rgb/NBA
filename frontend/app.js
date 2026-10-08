@@ -301,6 +301,7 @@ function renderAll(){
   renderSteps(); renderPriceTabs(); renderStasiunRows(); renderHargaRows(); renderMapPins(); renderBerita(); renderNasabah(); renderKas(); renderNotifBadge(); renderHistori(); renderBeritaRows(); fillStasiunFilter(); renderLaporan();
   document.getElementById("adminRows").innerHTML = trxRows(false);
   document.getElementById("adminRows2").innerHTML = trxRows(true);
+  renderUserRows();
 }
 async function init(){
   const l = document.getElementById("loader");
@@ -318,7 +319,7 @@ async function init(){
   document.getElementById("modalOv").addEventListener("click", e=>{ if(e.target.id==="modalOv") closeModal(); });
   document.querySelectorAll(".slink[data-ap]").forEach(b=>b.addEventListener("click",()=>{
     document.querySelectorAll(".slink[data-ap]").forEach(x=>x.classList.remove("on")); b.classList.add("on");
-    ["dash","peta","trx","stasiun","harga","lap","berita"].forEach(k=>{
+    ["dash","peta","trx","nasabah","stasiun","harga","lap","berita"].forEach(k=>{
       const p = document.getElementById("ap-"+k);
       p.style.display = k===b.dataset.ap ? "" : "none";
       if(k===b.dataset.ap){ animateIn(p, "anim-up"); if(k==="peta") refreshAdminMap(); }
@@ -657,6 +658,7 @@ async function doLogin(){
     ME = mapUser(r.user);
     await loadServerData();
     l.classList.remove("show"); setTimeout(()=>{ l.style.display = "none"; }, 280);
+    renderAll();
     loginAs(ME.role === "admin" ? "admin" : "nasabah");
   }catch(e){
     l.classList.remove("show"); setTimeout(()=>{ l.style.display = "none"; }, 280);
@@ -666,6 +668,49 @@ async function doLogin(){
 async function logout(){
   try{ await apiPost("/auth/logout"); }catch(e){}
   ME = null; go("landing");
+}
+function renderUserRows(){
+  const el = document.getElementById("userRows");
+  if(!el) return;
+  el.innerHTML = DB.users.map(u=>`<tr>
+    <td data-label="ID" style="white-space:nowrap;font-weight:700">${u.id}</td>
+    <td data-label="Nama">${u.nama}</td>
+    <td data-label="No. HP" style="white-space:nowrap">${u.tel||"-"}</td>
+    <td data-label="Saldo" style="white-space:nowrap">${rp(u.saldo)}</td>
+    <td data-label="Total" style="white-space:nowrap">${String(u.totalKg).replace(".",",")} Kg</td>
+    <td data-label="Status"><span class="pill ${u.aktif?"g":"o"}">${u.aktif?"Aktif":"Nonaktif"}</span></td>
+    <td data-label="Aksi" style="text-align:right;white-space:nowrap"><button class="btn btn-o" style="padding:7px 12px" onclick="userForm('${u.id}')">Kelola</button></td>
+  </tr>`).join("");
+}
+function userForm(id){
+  const u = DB.users.find(x=>x.id===id);
+  if(!u) return;
+  openModal(`<button class="mclose" onclick="closeModal()">\u00D7</button>
+    <h2>Kelola Nasabah</h2><p class="msub">${u.id}</p>
+    <div class="formrow"><label>Nama lengkap</label><input id="usNama" value="${u.nama.replace(/"/g,"&quot;")}"></div>
+    <div class="formrow"><label>No. HP</label><input id="usTel" value="${u.tel||""}" inputmode="numeric"></div>
+    <div class="formrow"><label>Status akun</label><select id="usAktif">
+      <option value="1"${u.aktif?" selected":""}>Aktif</option>
+      <option value="0"${u.aktif?"":" selected"}>Nonaktif — tidak bisa login</option>
+    </select></div>
+    <div class="formrow"><label>Password baru <span style="font-weight:400">(kosongkan jika tidak diubah)</span></label><input id="usPass" type="text" placeholder="min. 6 karakter" autocomplete="off"></div>
+    <div class="btnrow"><button class="btn btn-o" onclick="closeModal()">Batal</button>
+    <button class="btn btn-p" onclick="saveUser('${u.id}')">Simpan</button></div>`);
+}
+async function saveUser(id){
+  const pw = document.getElementById("usPass").value;
+  const body = {
+    nama: document.getElementById("usNama").value.trim(),
+    tel: document.getElementById("usTel").value.replace(/\D/g,""),
+    aktif: document.getElementById("usAktif").value === "1",
+  };
+  if(pw) body.password = pw;
+  try{
+    await apiPut("/users/" + id, body);
+    await refreshData();
+  }catch(e){ alert("Gagal menyimpan: " + e.message); return; }
+  addNotif("admin", "Nasabah diperbarui", `${body.nama} (${id}) diubah.${pw ? " Password di-reset." : ""}`);
+  renderAll(); closeModal();
 }
 function renderBeritaRows(){
   const el = document.getElementById("beritaRows");
