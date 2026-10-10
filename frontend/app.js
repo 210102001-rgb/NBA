@@ -243,6 +243,7 @@ let leafMaps = {};
 function pinColor(s){ return s==="Online" ? "#2E9E4F" : (s==="Offline" ? "#E53935" : "#F9A825"); }
 let pinMarkers = {};
 let stasiunTerpilih = null;
+const pinMarkersLanding = {};
 function pinIcon(s, selected){
   return L.divIcon({ className: "", html: '<div class="lpin' + (s.status==="Online"?" pulse":"") + (selected?" sel":"") + '" style="background:' + pinColor(s.status) + '">' + s.id.replace("ST-","") + '</div>', iconSize: [38,38], iconAnchor: [19,19] });
 }
@@ -275,6 +276,7 @@ function renderMapPins(){
         pinMarkers[s.id] = mk;
         mk.on("click", ()=>pilihPin(s.id));
       } else {
+        pinMarkersLanding[s.id] = mk;
         mk.on("popupopen", ()=>{ setTimeout(()=>showStasiunDetail(s.id), 350); });
       }
     });
@@ -299,6 +301,31 @@ function cariStasiun(){
   box.innerHTML = stasiunHasilHTML(hasil, "pilihStasiunPeta");
   box.style.display = "block";
 }
+function cariStasiunLanding(){
+  const q = (document.getElementById("landingCari").value||"").trim();
+  const box = document.getElementById("landingHasil");
+  if(!q){ box.style.display="none"; box.innerHTML=""; return; }
+  const hasil = matchStasiun(q);
+  if(!hasil.length){ box.innerHTML = '<div class="mr-empty">Stasiun tidak ditemukan.</div>'; box.style.display="block"; return; }
+  box.innerHTML = stasiunHasilHTML(hasil, "lompatKeStasiunLanding");
+  box.style.display = "block";
+}
+function lompatKeStasiunLanding(id){
+  const box = document.getElementById("landingHasil");
+  box.style.display="none"; box.innerHTML="";
+  document.getElementById("landingCari").value = "";
+  const s = DB.stasiun.find(x=>x.id===id);
+  if(!s || s.lat==null || s.lng==null) return;
+  const m = leafMaps["leafletMap"];
+  const sec = document.getElementById("peta");
+  if(sec) sec.scrollIntoView({behavior:"smooth", block:"start"});
+  setTimeout(()=>{
+    if(!m) return;
+    m.invalidateSize();
+    try{ m.flyTo([s.lat, s.lng], 15, { duration: 1.2 }); }catch(e){ m.setView([s.lat, s.lng], 15); }
+    setTimeout(()=>{ const mk = pinMarkersLanding[id]; if(mk) mk.openPopup(); }, 1300);
+  }, 450);
+}
 function cariStasiunDash(){
   const q = (document.getElementById("dashCari").value||"").trim();
   const box = document.getElementById("dashHasil");
@@ -308,6 +335,11 @@ function cariStasiunDash(){
   box.innerHTML = stasiunHasilHTML(hasil, "lompatKeStasiun");
   box.style.display = "block";
 }
+document.addEventListener("click", function(e){
+  const box = document.getElementById("landingHasil");
+  const inp = document.getElementById("landingCari");
+  if(box && box.style.display==="block" && !e.target.closest(".mapsearch")){ box.style.display="none"; }
+});
 function goAdminTab(k){
   const b = document.querySelector(`.slink[data-ap="${k}"]`);
   if(b) b.click();
@@ -476,7 +508,7 @@ function renderNasabah(){
   if(nr) nr.innerHTML = rows.map(t=>`<tr onclick="showTrxDetail('${t.id}')" style="cursor:pointer"><td data-label="Tanggal">${t.tgl}</td><td data-label="Kategori">${t.kategori}</td><td data-label="Berat">${String(t.berat).replace(".",",")} ${t.satuan||"Kg"}</td><td data-label="Total" style="text-align:right;font-weight:700">${rp(t.total)}</td></tr>`).join("") || `<tr><td colspan="4" style="text-align:center;color:var(--mut)">Belum ada setoran.</td></tr>`;
   document.querySelectorAll("[data-nfc-id]").forEach(e=>e.textContent = u.nfc);
   document.querySelectorAll("[data-user-id]").forEach(e=>e.textContent = u.id);
-  document.querySelectorAll("[data-user-tel]").forEach(e=>e.textContent = u.tel.replace(/(\d{4})(\d+)(\d{4})/,"$1\u2022\u2022\u2022\u2022$3"));
+  document.querySelectorAll("[data-user-tel]").forEach(e=>e.textContent = u.tel?u.tel.replace(/(\d{4})(\d+)(\d{4})/,"$1\u2022\u2022\u2022\u2022$3"):"-");
   document.querySelectorAll("[data-user-sejak]").forEach(e=>e.textContent = u.sejak);
   document.querySelectorAll(".snum2").forEach(e=>e.textContent = rp(u.saldo));
   try{ renderGrafik(); }catch(e){ console.warn("grafik:", e); }
@@ -548,6 +580,21 @@ function closeModal(){
   const ov = document.getElementById("modalOv");
   ov.classList.remove("show");
   setTimeout(()=>{ ov.style.display="none"; }, 250);
+}
+/* dialog custom se-tema pengganti showAlert(, "err")/confirm() native */
+const DLG_ICON = { ok:["ok","✓"], err:["err","✕"], info:["info","ℹ"], warn:["warn","⚠"] };
+function showAlert(msg, kind){
+  kind = kind || "info";
+  const [cls, ic] = DLG_ICON[kind] || DLG_ICON.info;
+  const judul = kind === "err" ? "Gagal" : kind === "ok" ? "Berhasil" : "Info";
+  openModal(`<div class="dlg"><div class="dlg-ic ${cls}">${ic}</div><h3>${judul}</h3><p>${msg}</p><div class="dlg-btns"><button class="btn" onclick="closeModal()">OK</button></div></div>`);
+}
+function showConfirm(msg, okLabel){
+  okLabel = okLabel || "Ya";
+  return new Promise(res=>{
+    window._dlgRes = res;
+    openModal(`<div class="dlg"><div class="dlg-ic warn">⚠</div><h3>Konfirmasi</h3><p>${msg}</p><div class="dlg-btns"><button class="btn-ghost" onclick="closeModal();window._dlgRes(false)">Batal</button><button class="btn-danger" onclick="closeModal();window._dlgRes(true)">${okLabel}</button></div></div>`);
+  });
 }
 function findTrx(id){
   return DB.transaksi.find(t=>t.id===id) || DB.outbox.find(t=>t.id===id);
@@ -763,7 +810,7 @@ function simTap(){
 }
 async function simFinish(){
   const u = currentUser();
-  if(!u){ alert("Sesi berakhir, silakan login ulang."); return; }
+  if(!u){ showAlert("Sesi berakhir, silakan login ulang.", "err"); return; }
   let total = Math.round(sim.berat * sim.harga);
   const catEl = document.getElementById("simCat");
   const cat = sim.cat || (catEl && catEl.value) || Object.keys(DB.harga)[0];
@@ -780,7 +827,7 @@ async function simFinish(){
       const res = await apiPost("/transaksi", { stasiun_id: "ST-01", kategori: cat, item: sim.item, berat: sim.berat });
       total = res.total; savedId = res.id;
       await refreshData();
-    }catch(e){ alert("Gagal menyimpan setoran: " + e.message); return; }
+    }catch(e){ showAlert("Gagal menyimpan setoran: " + e.message, "err"); return; }
     addNotif(u.id, "Setoran berhasil", `${sim.item} ${String(sim.berat).replace(".",",")} ${sim.satuan} — ${rp(total)} masuk ke saldo kamu.`);
     addNotif("admin", "Setoran baru", `${u.nama} menyetor ${sim.item} (${rp(total)}) di ST-01.`);
   }
@@ -797,8 +844,8 @@ function doWithdraw(){
   const u = currentUser();
   const amt = Math.round(+document.getElementById("wdAmount").value || 0);
   const method = document.getElementById("wdMethod").value;
-  if(!amt || amt < 10000){ alert("Minimal penarikan Rp 10.000."); return; }
-  if(amt > u.saldo){ alert("Saldo tidak mencukupi."); return; }
+  if(!amt || amt < 10000){ showAlert("Minimal penarikan Rp 10.000.", "err"); return; }
+  if(amt > u.saldo){ showAlert("Saldo tidak mencukupi.", "err"); return; }
   openModal(`<button class="mclose" onclick="closeModal()">\u00D7</button>
     <h2>Konfirmasi Penarikan</h2><p class="msub">Periksa kembali sebelum dikonfirmasi.</p>
     <div class="kv"><span>Jumlah</span><b style="font-size:19px">${rp(amt)}</b></div>
@@ -809,7 +856,7 @@ function doWithdraw(){
 }
 async function doWithdrawExec(amt, method){
   const u = currentUser();
-  if(!u){ alert("Sesi berakhir, silakan login ulang."); return; }
+  if(!u){ showAlert("Sesi berakhir, silakan login ulang.", "err"); return; }
   if(DB.offline){
     const trx = { id: newTrxId(), tgl: fmtTgl(), userId: u.id, nama: u.nama, stasiun: "ST-01",
       kategori: "Penarikan", item: "", berat: 0, harga: 0, satuan: "", total: amt, tipe: "tarik",
@@ -825,7 +872,7 @@ async function doWithdrawExec(amt, method){
   try{
     await apiPost("/transaksi", { tipe: "tarik", jumlah: amt, metode: method });
     await refreshData();
-  }catch(e){ alert("Penarikan gagal: " + e.message); return; }
+  }catch(e){ showAlert("Penarikan gagal: " + e.message, "err"); return; }
   addNotif(u.id, "Penarikan berhasil", `${rp(amt)} via ${method}.`);
   addNotif("admin", "Penarikan saldo", `${u.nama} menarik ${rp(amt)} via ${method}.`);
   saveDB(); renderAll(); closeModal();
@@ -848,13 +895,13 @@ async function doRegister(){
   const tel = document.getElementById("rgTel").value.replace(/\D/g,"");
   const alamat = document.getElementById("rgAlamat").value.trim();
   const pass = document.getElementById("rgPass").value;
-  if(!nama || tel.length < 10){ alert("Isi nama dan No. HP yang valid (min 10 digit)."); return; }
-  if(!pass || pass.length < 6){ alert("Password minimal 6 karakter."); return; }
+  if(!nama || tel.length < 10){ showAlert("Isi nama dan No. HP yang valid (min 10 digit).", "err"); return; }
+  if(!pass || pass.length < 6){ showAlert("Password minimal 6 karakter.", "err"); return; }
   try{
     const r = await apiPost("/auth/register", { nama: nama, tel: tel, alamat: alamat, password: pass });
     ME = mapUser(r.user);
     await loadServerData();
-  }catch(e){ alert("Pendaftaran gagal: " + e.message); return; }
+  }catch(e){ showAlert("Pendaftaran gagal: " + e.message, "err"); return; }
   addNotif(ME.id, "Selamat datang di NBA!", "Akun & kartu NFC kamu sudah aktif. Lakukan setoran pertamamu!");
   addNotif("admin", "Nasabah baru", `${ME.nama} (${ME.id}) baru saja mendaftar.`);
   saveDB(); closeModal();
@@ -864,7 +911,7 @@ async function doRegister(){
 async function doLogin(){
   const u = document.getElementById("liUser").value.trim();
   const p = document.getElementById("liPass").value;
-  if(!u || !p){ alert("Isi username & password."); return; }
+  if(!u || !p){ showAlert("Isi username & password.", "err"); return; }
   const l = document.getElementById("loader");
   l.style.display = "flex"; requestAnimationFrame(()=>l.classList.add("show"));
   try{
@@ -876,7 +923,7 @@ async function doLogin(){
     loginAs(ME.role === "admin" ? "admin" : "nasabah");
   }catch(e){
     l.classList.remove("show"); setTimeout(()=>{ l.style.display = "none"; }, 280);
-    alert("Login gagal: " + e.message);
+    showAlert("Login gagal: " + e.message, "err");
   }
 }
 async function logout(){
@@ -926,7 +973,7 @@ async function saveUser(id){
   try{
     await apiPut("/users/" + id, body);
     await refreshData();
-  }catch(e){ alert("Gagal menyimpan: " + e.message); return; }
+  }catch(e){ showAlert("Gagal menyimpan: " + e.message, "err"); return; }
   addNotif("admin", "Nasabah diperbarui", `${body.nama} (${id}) diubah.${pw ? " Password di-reset." : ""}`);
   renderAll(); closeModal();
 }
@@ -1004,7 +1051,7 @@ function initStasiunMapPick(id){
 }
 async function saveStasiun(id){
   const nama = document.getElementById("stNama").value.trim();
-  if(!nama){ alert("Nama BSU wajib diisi."); return; }
+  if(!nama){ showAlert("Nama BSU wajib diisi.", "err"); return; }
   const data = { nama: nama,
     lokasi: document.getElementById("stLokasi").value.trim(),
     alamat: document.getElementById("stAlamat").value.trim(),
@@ -1024,13 +1071,13 @@ async function saveStasiun(id){
       addNotif("admin","Stasiun baru",`${nama} (${nid}) ditambahkan.`);
     }
     await refreshData();
-  }catch(e){ alert("Gagal menyimpan stasiun: " + e.message); return; }
+  }catch(e){ showAlert("Gagal menyimpan stasiun: " + e.message, "err"); return; }
   renderAll(); fillStasiunFilter(); closeModal();
 }
 async function delStasiun(id){
-  if(!confirm("Hapus stasiun "+id+"?")) return;
+  if(!(await showConfirm("Hapus stasiun "+id+"?", "Hapus"))) return;
   try{ await apiDel("/stasiun/" + id); await refreshData(); }
-  catch(e){ alert("Gagal menghapus: " + e.message); return; }
+  catch(e){ showAlert("Gagal menghapus: " + e.message, "err"); return; }
   renderAll(); fillStasiunFilter();
 }
 function showStasiunDetail(id){
@@ -1067,16 +1114,16 @@ async function saveHarga(){
   let cat = document.getElementById("hgCat").value;
   if(cat === "__new"){
     cat = document.getElementById("hgCatNewV").value.trim();
-    if(!cat){ alert("Isi nama kategori baru."); return; }
+    if(!cat){ showAlert("Isi nama kategori baru.", "err"); return; }
   }
   const nama = document.getElementById("hgNama").value.trim();
   const harga = Math.round(+document.getElementById("hgHarga").value || 0);
   const satuan = document.getElementById("hgSatuan").value;
-  if(!nama || harga <= 0){ alert("Isi nama item dan harga yang valid."); return; }
+  if(!nama || harga <= 0){ showAlert("Isi nama item dan harga yang valid.", "err"); return; }
   try{
     await apiPost("/harga", { kategori: cat, item: nama, harga: harga, satuan: satuan });
     await refreshData();
-  }catch(e){ alert("Gagal menyimpan harga: " + e.message); return; }
+  }catch(e){ showAlert("Gagal menyimpan harga: " + e.message, "err"); return; }
   addNotif("admin","Harga baru",`${nama} (${cat}): ${rp(harga)}/${satuan}.`);
   renderAll(); closeModal();
 }
@@ -1096,20 +1143,20 @@ async function saveEditHarga(cat, nama){
   const lama = r ? r[1] : 0;
   const baru = Math.round(+document.getElementById("ehHarga").value || 0);
   const alasan = document.getElementById("ehAlasan").value.trim() || "Penyesuaian harga";
-  if(baru <= 0){ alert("Harga tidak valid."); return; }
+  if(baru <= 0){ showAlert("Harga tidak valid.", "err"); return; }
   try{
     await apiPut("/harga", { kategori: cat, item: nama, harga_baru: baru, alasan: alasan });
     await refreshData();
-  }catch(e){ alert("Gagal mengubah harga: " + e.message); return; }
+  }catch(e){ showAlert("Gagal mengubah harga: " + e.message, "err"); return; }
   if(baru !== lama) addNotif("admin","Harga diubah",`${nama}: ${rp(lama)} → ${rp(baru)}. ${alasan}`);
   renderAll(); closeModal();
 }
 async function delHarga(cat, nama){
-  if(!confirm(`Hapus "${nama}" dari kategori ${cat}?`)) return;
+  if(!(await showConfirm(`Hapus "${nama}" dari kategori ${cat}?`, "Hapus"))) return;
   try{
     await apiDel("/harga?kategori=" + encodeURIComponent(cat) + "&item=" + encodeURIComponent(nama));
     await refreshData();
-  }catch(e){ alert("Gagal menghapus: " + e.message); return; }
+  }catch(e){ showAlert("Gagal menghapus: " + e.message, "err"); return; }
   renderAll();
 }
 function gantiPassForm(){
@@ -1125,12 +1172,12 @@ async function saveGantiPass(){
   const lama = document.getElementById("gpLama").value;
   const baru = document.getElementById("gpBaru").value;
   const baru2 = document.getElementById("gpBaru2").value;
-  if(!lama || !baru){ alert("Isi password lama dan baru."); return; }
-  if(baru !== baru2){ alert("Konfirmasi password baru tidak sama."); return; }
+  if(!lama || !baru){ showAlert("Isi password lama dan baru.", "err"); return; }
+  if(baru !== baru2){ showAlert("Konfirmasi password baru tidak sama.", "err"); return; }
   try{ await apiPost("/auth/ganti-password", { lama, baru }); }
-  catch(e){ alert("Gagal: " + e.message); return; }
+  catch(e){ showAlert("Gagal: " + e.message, "err"); return; }
   closeModal();
-  alert("Password berhasil diganti.");
+  showAlert("Password berhasil diganti.", "ok");
 }
 function beritaForm(i){
   const b = (i===undefined||i===null) ? {tgl:fmtTgl().split(" \u00B7 ")[0], judul:"", isi:"", warna:"linear-gradient(135deg,#2E9E4F,#7CB342)", icon:"\u{0001F4F0}"} : DB.berita[i];
@@ -1152,7 +1199,7 @@ function pickWarna(el){
 async function saveBerita(i){
   const judul = document.getElementById("brJudul").value.trim();
   const isi = document.getElementById("brIsi").value.trim();
-  if(!judul || !isi){ alert("Judul dan isi wajib diisi."); return; }
+  if(!judul || !isi){ showAlert("Judul dan isi wajib diisi.", "err"); return; }
   const b = { tgl: fmtTgl().split(" · ")[0], judul: judul, isi: isi,
     warna: document.getElementById("brWarna").value, icon: "\u{0001F4F0}",
     gambar: document.getElementById("brGambar").value.trim() };
@@ -1160,14 +1207,14 @@ async function saveBerita(i){
     if(i == null) await apiPost("/berita", b);
     else await apiPut("/berita/" + DB.berita[i]._id, b);
     await refreshData();
-  }catch(e){ alert("Gagal menyimpan berita: " + e.message); return; }
+  }catch(e){ showAlert("Gagal menyimpan berita: " + e.message, "err"); return; }
   renderAll(); closeModal();
 }
 function editBerita(i){ beritaForm(i); }
 async function delBerita(i){
-  if(!confirm("Hapus berita ini?")) return;
+  if(!(await showConfirm("Hapus berita ini?", "Hapus"))) return;
   try{ await apiDel("/berita/" + DB.berita[i]._id); await refreshData(); }
-  catch(e){ alert("Gagal menghapus: " + e.message); return; }
+  catch(e){ showAlert("Gagal menghapus: " + e.message, "err"); return; }
   renderAll();
 }
 function setOffline(v, auto){
@@ -1188,7 +1235,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
   }
 });
 async function syncOutbox(){
-  if(!DB.outbox.length){ alert("Tidak ada antrean offline."); return; }
+  if(!DB.outbox.length){ showAlert("Tidak ada antrean offline.", "info"); return; }
   const n = DB.outbox.length;
   const gagal = [];
   for(const t of DB.outbox){
@@ -1208,7 +1255,7 @@ async function syncOutbox(){
 /* ═══ input transaksi manual oleh admin ═══ */
 function inputManual(){
   const users = DB.users.filter(u=>u.aktif && u.role !== "admin");
-  if(!users.length){ alert("Belum ada data nasabah."); return; }
+  if(!users.length){ showAlert("Belum ada data nasabah.", "info"); return; }
   const cats = Object.keys(DB.harga);
   openModal(`<button class="mclose" onclick="closeModal()">\u00D7</button>
     <h2>Input Setoran Manual</h2><p class="msub">Catat setoran langsung tanpa lewat simulasi timbangan.${DB.offline ? " <b>Offline:</b> tersimpan di perangkat, sync otomatis saat online." : ""}</p>
@@ -1240,8 +1287,8 @@ async function simpanManual(){
   const [item, hargaStr] = document.getElementById("imItem").value.split("|");
   const berat = parseFloat(String(document.getElementById("imBerat").value).replace(",", ".")) || 0;
   const u = DB.users.find(x=>x.id===userId);
-  if(!u){ alert("Pilih nasabah."); return; }
-  if(!(berat > 0)){ alert("Isi berat yang valid."); return; }
+  if(!u){ showAlert("Pilih nasabah.", "err"); return; }
+  if(!(berat > 0)){ showAlert("Isi berat yang valid.", "err"); return; }
   const harga = +hargaStr || 0, total = Math.round(berat * harga);
   if(DB.offline){
     DB.outbox.push({ id: newTrxId(), tgl: fmtTgl(), userId: u.id, nama: u.nama, stasiun,
@@ -1249,15 +1296,15 @@ async function simpanManual(){
     addNotif("admin", "Setoran manual tersimpan offline", `${u.nama} · ${item} ${berat} Kg (${rp(total)}) — menunggu sync.`);
     addNotif(u.id, "Setoran dicatat", `${item} ${berat} Kg — ${rp(total)}. Menunggu sync.`);
     saveDB(); renderAll(); closeModal();
-    alert("Tersimpan di antrean offline. Akan tersinkron otomatis saat online.");
+    showAlert("Tersimpan di antrean offline. Akan tersinkron otomatis saat online.", "ok");
     return;
   }
   try{
     await apiPost("/transaksi", { user_id: userId, stasiun_id: stasiun, kategori, item, berat });
     await refreshData(); renderAll(); closeModal();
     addNotif("admin", "Setoran manual", `${u.nama} · ${item} ${berat} Kg (${rp(total)}).`);
-    alert("Setoran tersimpan: " + u.nama + " — " + rp(total));
-  }catch(e){ alert("Gagal menyimpan: " + e.message); }
+    showAlert("Setoran tersimpan: " + u.nama + " — " + rp(total), "ok");
+  }catch(e){ showAlert("Gagal menyimpan: " + e.message, "err"); }
 }
 function kasTerima(){
   openModal(`<button class="mclose" onclick="closeModal()">\u00D7</button>
@@ -1269,12 +1316,12 @@ function kasTerima(){
 }
 async function kasTerimaExec(){
   const n = Math.round(+document.getElementById("kasNominal").value || 0);
-  if(n <= 0){ alert("Nominal tidak valid."); return; }
+  if(n <= 0){ showAlert("Nominal tidak valid.", "err"); return; }
   const ket = document.getElementById("kasKet").value.trim() || "Pengelola";
   try{
     await apiPost("/kas/tambah", { jumlah: n, keterangan: ket });
     await refreshData();
-  }catch(e){ alert("Gagal: " + e.message); return; }
+  }catch(e){ showAlert("Gagal: " + e.message, "err"); return; }
   addNotif("admin","Kas bertambah",`${rp(n)} diterima (${ket}).`);
   saveDB(); renderKas(); closeModal();
 }
@@ -1342,7 +1389,7 @@ async function installPWA(){
     document.getElementById("pwaBanner").style.display = "none";
     return;
   }
-  alert("Untuk memasang aplikasi NBA:\n\n\u2022 Chrome Android: ketuk \u22EE \u2192 \u201CInstall app\u201D / \u201CTambahkan ke Layar utama\u201D\n\u2022 iPhone: ketuk Share \u2192 \u201CAdd to Home Screen\u201D\n\u2022 Buka lewat browser Chrome/Safari, bukan dari dalam aplikasi chat.");
+  showAlert("Untuk memasang aplikasi NBA:\n\n\u2022 Chrome Android: ketuk \u22EE \u2192 \u201CInstall app\u201D / \u201CTambahkan ke Layar utama\u201D\n\u2022 iPhone: ketuk Share \u2192 \u201CAdd to Home Screen\u201D\n\u2022 Buka lewat browser Chrome/Safari, bukan dari dalam aplikasi chat.", "info");
 }
 function dismissPWA(){
   document.getElementById("pwaBanner").style.display = "none";
