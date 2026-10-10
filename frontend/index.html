@@ -12,17 +12,25 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <title>NBA — Bank Sampah Digital · S-cale Smart Scale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;0,9..144,900;1,9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+/* ═══ NBA Visual System v2 — Warm Eco-Fintech ═══ */
 :root{
   --nba:#16442B; --nba-d:#0E3320; --olive:#75802E; --leaf:#7CB342;
-  --gold:#EAB308; --orange:#F59E0B;
+  --gold:#D9992B; --orange:#F59E0B;
   --blue:#1E88E5; --purple:#8E24AA; --red:#E53935;
-  --bg:#F4F8F1; --card:#FFFFFF; --ink:#1E2A22; --mut:#6B7A6E; --line:#E4EBE0;
+  --bg:#F6F3EA; --paper2:#EFEAD9; --card:#FFFFFF; --ink:#1C2B21; --mut:#67766B; --line:#E4DFCE;
+  --pine950:#0C2418; --pine800:#14402A; --tint:#E3F0E4;
   --r:14px; --sh:0 2px 10px rgba(22,68,43,.08);
+  --serif:"Fraunces",Georgia,"Times New Roman",serif;
+  --sans:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14.5px;line-height:1.55}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:14.5px;line-height:1.55}
+.serif{font-family:var(--serif)}
 a{color:inherit;text-decoration:none}
 button{font-family:inherit}
 .wrap{max-width:1180px;margin:0 auto;padding:0 18px}
@@ -180,10 +188,14 @@ table.data tr:last-child td{border-bottom:0}
 .molitip p{font-size:13px;color:#7A5B1E;margin:0}
 .npanel .panel{margin-bottom:16px}
 .npanel .steps{gap:12px;margin-bottom:16px}
+#stepsApp .step{border:1px solid var(--line);border-top:none;border-radius:14px;box-shadow:var(--sh);overflow:hidden;background:#fff}
+#stepsApp .step .n{background:var(--nba);color:#fff;font-size:11px;font-weight:800;padding:5px 12px;display:inline-block;border-radius:0 0 10px 0}
 .tabbar{position:fixed;left:50%;transform:translateX(-50%);width:min(412px,calc(100vw - 28px));bottom:calc(14px + env(safe-area-inset-bottom));background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:26px;display:flex;box-shadow:0 12px 32px rgba(22,68,43,.16);padding:8px;z-index:40}
 .tabbar button{flex:1;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:#9AA5A0;padding:9px 2px;border-radius:18px;cursor:pointer}
 .tabbar button .ti{font-size:21px}
 .tabbar button.on{color:var(--nba-d);background:#E7F3EA}
+.nsbrand,.nsuser{display:none}
+.nsnav{display:contents}
 .fine{font-size:12.5px;color:var(--mut)}
 .ptabs-app{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 14px;scrollbar-width:none}
 .ptabs-app::-webkit-scrollbar{display:none}
@@ -323,6 +335,64 @@ table.data tr:last-child td{border-bottom:0}
 
 /* === peta Leaflet === */
 .leaflet-box{height:380px;border-radius:18px;overflow:hidden;box-shadow:var(--sh);z-index:1}
+.maptools{display:flex;gap:10px;margin-bottom:12px}
+.mapsearch{position:relative;flex:1;max-width:440px}
+.mapsearch input{width:100%;padding:12px 16px 12px 42px;border-radius:14px;border:1px solid var(--line);font-size:14px;background:#fff}
+.mapsearch input:focus{outline:2px solid var(--nba);outline-offset:1px;border-color:var(--nba)}
+.msear{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:17px;pointer-events:none}
+.mapresults{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px rgba(22,68,43,.18);z-index:600;overflow:hidden}
+.mapresults button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:11px 14px;border:0;background:#fff;cursor:pointer;font-size:13.5px;border-bottom:1px solid #F0F4EF}
+.mapresults button:last-child{border-bottom:0}
+.mapresults button:hover{background:#F0F7F1}
+.mapresults button b{font-weight:800;color:var(--nba-d)}
+.mapresults button .pill{margin-left:auto}
+.mr-empty{padding:12px 14px;color:var(--mut);font-size:13px}
+.lpin.sel{outline:3px solid #fff;box-shadow:0 0 0 6px rgba(46,158,82,.45),0 8px 20px rgba(0,0,0,.30);transform:scale(1.18)}
+.stcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-top:12px;box-shadow:var(--sh)}
+.stcard h3{margin:0 0 2px;font-size:16px}
+.stcard .msub{color:var(--mut);font-size:12.5px;margin:0 0 12px}
+.stcard .kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #F0F4EF;font-size:13px}
+.stcard .kv:last-of-type{border-bottom:0}
+.stcard .kv span{color:var(--mut)}
+.stcard .kv b{text-align:right}
+.stcard .btnrow{display:flex;gap:10px;margin-top:12px}
+.simcomp{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--nba-d);background:#E7F3EA;border-radius:999px;padding:5px 12px;margin-bottom:10px}
+.sbox-tag{display:inline-flex;align-items:center;gap:8px;background:#FFF7E6;border:1.5px solid #F0C36D;color:#8A5A00;font-weight:800;border-radius:12px;padding:8px 14px;font-size:13.5px}
+
+/* ═══ v2: anti-AI-slop — landing editorial ═══ */
+.kick,.sec-h .tag,.art-kicker{display:none !important}
+.sec-h{margin:0 0 30px;max-width:720px;text-align:left}
+.sec-h h2{font-family:var(--serif);font-size:clamp(28px,4vw,42px);font-weight:900;letter-spacing:-.02em;line-height:1.1;margin:0 0 10px}
+.sec-h p{color:var(--mut);font-size:15.5px;max-width:62ch;line-height:1.7}
+.hero{background:var(--bg);color:var(--ink)}
+.hero h1{font-family:var(--serif);font-weight:900;letter-spacing:-.025em;line-height:1.02;font-size:clamp(38px,5.4vw,68px)}
+.hero h1 em{font-style:italic;color:var(--nba)}
+.hero .lead{color:var(--mut);font-size:16.5px;line-height:1.75;max-width:52ch}
+.hero-stats .hstat b{font-family:var(--serif);font-weight:900;letter-spacing:-.01em}
+.mascot-card{background:#fff;border:1px solid var(--line);box-shadow:var(--sh)}
+/* langkah: kartu pelangi -> editorial bernomor */
+#steps{grid-template-columns:repeat(4,1fr);gap:0}
+#steps .step{background:transparent;border:0 !important;border-radius:0;box-shadow:none;overflow:visible;border-top:2px solid var(--line) !important;padding:22px 22px 26px 0;margin-right:22px}
+#steps .step .n{background:none !important;color:var(--gold);font-family:var(--serif);font-size:40px;font-weight:900;padding:0;display:block;border-radius:0;letter-spacing:-.02em}
+#steps .step .b{padding:0}
+#steps .step .b b{font-size:15px;margin:8px 0 6px}
+/* siklus: hilangkan tile ikon generik */
+.cstep{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.cstep .cic{background:transparent !important;font-size:40px;box-shadow:none}
+.cstep .cnum{font-family:var(--serif);color:var(--gold)}
+.cycle-close{background:var(--tint);border:1px solid var(--line)}
+/* ═══ v2: aplikasi nasabah ═══ */
+.saldo-hero .snum{font-family:var(--serif);font-weight:900;letter-spacing:-.02em}
+.apptitle{font-family:var(--serif);font-weight:800;letter-spacing:-.01em}
+.gcol h4{font-family:var(--serif)}
+/* ═══ v2: admin ═══ */
+#view-admin h1{font-family:var(--serif);font-weight:900;letter-spacing:-.02em}
+.stat{background:#fff;border:1px solid var(--line);border-top:3px solid var(--nba);border-radius:var(--r);box-shadow:var(--sh)}
+.stat b{font-family:var(--serif);font-weight:900;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.kascard b{font-family:var(--serif);font-variant-numeric:tabular-nums}
+table.data th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+table.data{font-variant-numeric:tabular-nums}
+@media(max-width:900px){#steps{grid-template-columns:1fr 1fr}#steps .step{margin-right:0}}
 .lpin{width:38px;height:38px;border-radius:50%;border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:9px;letter-spacing:.3px}
 .lpin.pulse{animation:lpinPulse 2.2s ease-out infinite}
 @keyframes lpinPulse{0%{box-shadow:0 0 0 0 rgba(46,158,79,.55)}70%{box-shadow:0 0 0 16px rgba(46,158,79,0)}100%{box-shadow:0 0 0 0 rgba(46,158,79,0)}}
@@ -331,21 +401,47 @@ table.data tr:last-child td{border-bottom:0}
 
 /* === nasabah desktop full-width === */
 @media(min-width:900px){
-  #view-nasabah{padding:26px 18px}
-  .phone{max-width:1020px;border-radius:28px;min-height:0}
-  .apphead{order:0;padding:26px 32px 4px}
-  .tabbar{order:1;position:static;margin:12px 32px 0;left:auto;right:auto;bottom:auto;border-radius:20px}
-  .tabbar button{flex-direction:row;justify-content:center;gap:8px;font-size:13px;padding:13px 8px}
-  .tabbar button .ti{font-size:19px}
-  .appbody{order:2;border-radius:0;background:transparent;padding:22px 32px 32px}
+  #view-nasabah{padding:0 !important}
+  .phone{max-width:none;margin:0;border-radius:0;border:0;min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:248px 1fr;grid-template-rows:auto 1fr}
+  .apphead{grid-column:2;grid-row:1;padding:26px 32px 4px;align-self:start}
+  .tabbar{grid-column:1;grid-row:1/span 2;position:static;width:auto;transform:none;margin:0;left:auto;right:auto;bottom:auto;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;border:0;border-radius:0;padding:22px 16px 18px;color:#cfe0d2;background:radial-gradient(130% 55% at 50% 0%,rgba(124,179,66,.20),transparent 62%),linear-gradient(172deg,#0b2a17 0%,#123f24 58%,#15492a 100%)}
+  .nsbrand{display:flex;align-items:center;gap:12px;padding:2px 8px 20px}
+  .nslogo{width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.13);display:flex;align-items:center;justify-content:center;font-size:21px;flex:0 0 auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+  .nstitle{font-weight:800;color:#fff;font-size:16.5px;line-height:1.15;letter-spacing:-.01em}
+  .nstitle small{display:block;font-size:10.5px;font-weight:600;color:#9fc3a8;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+  .nsnav{display:flex;flex-direction:column;gap:6px}
+  .tabbar button{flex-direction:row;justify-content:flex-start;align-items:center;gap:12px;font-size:13.5px;font-weight:600;padding:9px 10px;color:inherit;background:transparent;border-radius:13px;width:100%;text-align:left}
+  .tabbar button .ti{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.10);display:flex;align-items:center;justify-content:center;font-size:17px;flex:0 0 auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
+  .tabbar button.on{background:#fff;color:#0e3320;box-shadow:0 10px 24px rgba(0,0,0,.28)}
+  .tabbar button.on .ti{background:#e7f3ea;box-shadow:none}
+  .tabbar button:not(.on):hover{background:rgba(255,255,255,.08)}
+  .nsuser{display:flex;align-items:center;gap:11px;margin-top:auto;padding:12px 10px 4px;border-top:1px solid rgba(255,255,255,.12)}
+  .nsava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#35a85c,#1e6b38);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex:0 0 auto;box-shadow:0 6px 14px rgba(0,0,0,.30)}
+  .nsuinfo{min-width:0;flex:1}
+  .nsuinfo b{display:block;color:#fff;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nsuinfo small{display:block;color:#9fc3a8;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nsout{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff;width:34px;height:34px;border-radius:10px;font-size:16px;cursor:pointer;flex:0 0 auto}
+  .nsout:hover{background:rgba(255,255,255,.16)}
+  .appbody{grid-column:2;grid-row:2;border-radius:0;background:transparent;padding:22px 32px 32px}
   #np-beranda{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
   #np-beranda .saldo-hero{grid-column:1/-1;margin:2px 0 2px}
   #np-beranda .qgrid{grid-column:1/-1;margin-bottom:2px}
+  #np-beranda .grafik-panel{grid-column:1/-1}
   #np-beranda .panel{margin-bottom:0}
   #stepsApp{grid-template-columns:1fr 1fr !important}
   .npanel .panel{margin-bottom:16px}
   #np-beranda .panel{margin-bottom:0}
 }
+/* grafik setoran (semua ukuran layar) */
+.gwrap{display:grid;grid-template-columns:1.2fr 1fr;gap:20px}
+.gcol h4{margin:0 0 10px;font-size:12.5px;color:var(--mut);font-weight:700}
+.gdonut{display:flex;align-items:center;gap:16px}
+.glegend{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
+.glegend>div{display:flex;align-items:center;gap:8px;font-size:12.5px}
+.glegend .gdot{width:11px;height:11px;border-radius:4px;flex:0 0 auto}
+.glegend b{margin-left:auto;font-weight:700;white-space:nowrap}
+.gempty{padding:28px 10px;text-align:center;color:var(--mut);font-size:13px}
+@media(max-width:640px){.gwrap{grid-template-columns:1fr}.gdonut{flex-direction:column;align-items:flex-start}.glegend{width:100%}}
 
 @media(max-width:900px){
   .hero-in{grid-template-columns:1fr;padding:40px 18px}
@@ -1087,12 +1183,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 <header class="hero" id="beranda"><div class="wrap hero-in">
   <div>
-    <span class="kick">♻️ NEXT-GEN BARRIER-FREE AUTOMATION · BANK SAMPAH DIGITAL</span>
-    <h1>Setor Sampah, <em>Tap Kartu</em>, Saldo Masuk Otomatis.</h1>
+    <h1>Sampah jadi <em>saldo.</em><br>Semua tercatat.</h1>
     <p class="lead">NBA <em style="font-style:normal;font-weight:700">(Next-Gen Barrier-free Automation)</em> menghadirkan timbangan pintar bertenaga AI: sampah ditimbang, jenisnya dikenali kamera, dan nilainya langsung masuk ke saldo kamu. Tanpa antre, tanpa catat manual.</p>
     <div class="hero-cta">
-      <button class="btn btn-g" onclick="go('masuk')">Mulai Menabung Sampah</button>
-      <button class="btn btn-o" style="border-color:#fff;color:#fff;background:transparent" onclick="goHarga()">Lihat Harga Sampah</button>
+      <button class="btn btn-p" onclick="go('masuk')">Mulai Menabung Sampah</button>
+      <button class="btn btn-o" onclick="goHarga()">Lihat Harga Sampah</button>
     </div>
     <div class="hero-stats">
       <div class="hstat"><b>1.248</b><span>Transaksi tercatat</span></div>
@@ -1172,7 +1267,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#2E9E4F,#7CB342)">♻️</div>
       <div class="b"><span class="date">28 Sep 2026</span><h3>12 Titik S-cale Resmi Beroperasi di Surakarta</h3><p>Serah terima perangkat tahap pertama selesai, 340 warga terdaftar sebagai nasabah.</p></div></div>
     <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#1E88E5,#64B5F6)">📰</div>
-      <div class="b"><span class="date">15 Sep 2026</span><h3>Harga Kardus Naik, Cek Daftar Terbaru</h3><p>Penyesuaian harga beli sampah kertas mengikuti harga pasar pengepul bulan ini.</p></div></div>
+      <div class="b"><span class="date">15 Sep 2026</span><h3>Harga Kardus Naik, Cek Daftar Terbaru</h3><p>Penyesuaian harga beli sampah kertas mengikuti harga pasar pengelola bank sampah bulan ini.</p></div></div>
     <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#F59E0B,#F9A825)">🎓</div>
       <div class="b"><span class="date">02 Sep 2026</span><h3>Sosialisasi Pilah Sampah di 6 Kelurahan</h3><p>Tim NBA edukasi 500+ warga soal memilah plastik, kertas, dan organik dari rumah.</p></div></div>
   </div>
@@ -1236,6 +1331,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         <button onclick="showNp('harga')"><span class="qe">💲</span><span>Harga</span></button>
         <button onclick="showNp('akun')"><span class="qe">👤</span><span>Akun</span></button>
       </div>
+      <div class="panel grafik-panel"><h3>📊 Grafik Setoran</h3><div class="gwrap" id="grafikWrap"></div></div>
       <div class="panel"><h3>Setoran Terakhir</h3>
         <table class="data"><tbody>
           <tr><td data-label="Waktu">Hari ini &middot; 10.05</td><td data-label="Kategori">Plastik PET</td><td data-label="Total" style="text-align:right"><b>Rp 7.050</b></td></tr>
@@ -1249,8 +1345,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
       <p class="appsub">Ikuti langkahnya di timbangan S-cale terdekat.</p>
       <div class="panel" style="background:linear-gradient(135deg,#1E6B38,#16442B);border:0;color:#fff">
         <h3 style="color:#fff">⚖️ Simulasi Timbangan</h3>
-        <p style="color:#CDE7D2;font-size:13px;margin:0 0 14px">Coba alur lengkap: timbang &rarr; deteksi AI &rarr; tap NFC &rarr; konfirmasi.</p>
-        <button class="btn" style="background:#fff;color:var(--nba-d);width:100%;border-radius:16px;padding:13px;font-weight:800" onclick="openSimulasi()">Mulai Simulasi</button>
+        <p style="color:#CDE7D2;font-size:13px;margin:0 0 14px">Coba alur lengkap: <b style="color:#fff">S-Cell</b> menimbang &rarr; <b style="color:#fff">S-Eye</b> mendeteksi AI &rarr; <b style="color:#fff">S-Tap</b> membaca NFC &rarr; <b style="color:#fff">S-Box</b> menampung per kategori.</p>
+        <button class="btn" style="background:#fff;color:var(--nba-d);width:auto;border-radius:14px;padding:12px 26px;font-weight:800;display:inline-flex;align-items:center;gap:8px" onclick="openSimulasi()">Mulai Simulasi <span aria-hidden="true">→</span></button>
       </div>
       <div class="steps" id="stepsApp"></div>
       <div class="panel"><h3>Stasiun Terdekat</h3>
@@ -1321,11 +1417,15 @@ svg.leaflet-image-layer.leaflet-interactive path {
     </div>
   </div>
   <nav class="tabbar">
+    <div class="nsbrand"><span class="nslogo">♻️</span><span class="nstitle">NBA<small>Bank Sampah Digital</small></span></div>
+    <div class="nsnav">
     <button class="on" data-np="beranda" onclick="showNp('beranda')"><span class="ti">🏠</span><span>Beranda</span></button>
     <button data-np="setor" onclick="showNp('setor')"><span class="ti">⚖️</span><span>Setor</span></button>
     <button data-np="riwayat" onclick="showNp('riwayat')"><span class="ti">🧾</span><span>Riwayat</span></button>
     <button data-np="harga" onclick="showNp('harga')"><span class="ti">💲</span><span>Harga</span></button>
     <button data-np="akun" onclick="showNp('akun')"><span class="ti">👤</span><span>Akun</span></button>
+    </div>
+    <div class="nsuser"><span class="nsava">?</span><span class="nsuinfo"><b class="who">–</b><small data-user-id>–</small></span><button class="nsout" onclick="logout()" title="Keluar" aria-label="Keluar">⏻</button></div>
   </nav>
 </div>
 </div>
@@ -1354,6 +1454,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
     </div>
     <div id="ap-dash">
       <h1>Dashboard</h1><p class="sub">Ringkasan operasional seluruh titik timbangan · real-time</p>
+      <div class="maptools">
+        <div class="mapsearch"><input id="dashCari" placeholder="Cari stasiun — pilih untuk lompat ke peta…" oninput="cariStasiunDash()" autocomplete="off"><span class="msear">🔍</span><div id="dashHasil" class="mapresults" style="display:none"></div></div>
+      </div>
       <div class="stat4">
         <div class="stat" style="border-color:var(--blue)"><small>🏭 Total Stasiun</small><b>12</b></div>
         <div class="stat" style="border-color:var(--leaf)"><small>🧾 Total Transaksi</small><b>1.248</b></div>
@@ -1370,9 +1473,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
         </div>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
           <label class="switch"><input type="checkbox" id="offlineToggle" onchange="setOffline(this.checked)"><span class="sl"></span></label>
-          <span style="font-size:13.5px;font-weight:600">Mode Offline (simulasi internet mati)</span>
+          <span style="font-size:13.5px;font-weight:600">Mode Offline <span style="font-weight:400;color:var(--mut)">(otomatis saat internet putus)</span></span>
           <span style="flex:1"></span>
-          <button class="btn btn-o" style="padding:9px 18px;font-size:13px" onclick="kasTerima()">+ Terima dari Pengepul</button>
+          <button class="btn btn-o" style="padding:9px 18px;font-size:13px" onclick="kasTerima()">+ Terima dari Pengelola</button>
         </div>
       </div>
       <div class="panel"><h3>🧾 Transaksi Terbaru</h3>
@@ -1381,7 +1484,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
       </div>
     </div>
     <div id="ap-peta" style="display:none">
-      <h1>Peta Lokasi Timbangan</h1><p class="sub">Status perangkat IoT per titik</p>
+      <h1>Peta Lokasi Timbangan</h1><p class="sub">Status perangkat IoT per titik — cari nama atau klik pin untuk memilih</p>
+      <div class="maptools">
+        <div class="mapsearch"><input id="petaCari" placeholder="Cari nama / ID stasiun…" oninput="cariStasiun()" autocomplete="off"><span class="msear">🔍</span><div id="petaHasil" class="mapresults" style="display:none"></div></div>
+      </div>
       <div class="mapbox">
       <div id="leafletMapAdmin" class="leaflet-box"></div>
       <div class="map-legend">
@@ -1390,6 +1496,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         <span><span class="dot" style="background:#F9A825"></span>Maintenance</span>
       </div>
     </div>
+      <div id="stasiunCard" class="stcard" style="display:none"></div>
     </div>
     <div id="ap-trx" style="display:none">
       <h1>Transaksi</h1><p class="sub">Semua transaksi setoran nasabah</p>
@@ -1397,6 +1504,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         <input id="fSearch" placeholder="🔍 Cari nama / kategori / ID…" oninput="filterTrx()" style="flex:1;min-width:160px">
         <select id="fStasiun" onchange="filterTrx()"><option value="">Semua Stasiun</option></select>
         <select id="fTipe" onchange="filterTrx()"><option value="">Semua Tipe</option><option value="setor">Setoran</option><option value="tarik">Penarikan</option></select>
+        <button class="btn btn-p" style="padding:10px 18px;font-size:13px" onclick="inputManual()">＋ Input Manual</button>
         <button class="btn btn-o" style="padding:10px 18px;font-size:13px" onclick="exportCSV()">⬇ Export CSV</button>
       </div>
       <div class="panel"><table class="data"><thead><tr><th>Waktu</th><th>User</th><th>Stasiun</th><th>Kategori</th><th>Berat</th><th>Harga/Kg</th><th style="text-align:right">Total</th><th>Status</th></tr></thead>
