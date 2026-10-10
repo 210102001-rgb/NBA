@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#2E9E4F">
+<meta name="theme-color" content="#0CA678">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -14,17 +14,17 @@
 <title>NBA — Bank Sampah Digital · S-cale Smart Scale</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;0,9..144,900;1,9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ═══ NBA Visual System v2 — Warm Eco-Fintech ═══ */
 :root{
-  --nba:#16442B; --nba-d:#0E3320; --olive:#75802E; --leaf:#7CB342;
-  --gold:#D9992B; --orange:#F59E0B;
+  --nba:#0A6B4F; --nba-d:#073B2C; --olive:#0CA678; --leaf:#34D399;
+  --gold:#FF8A3D; --orange:#F59E0B;
   --blue:#1E88E5; --purple:#8E24AA; --red:#E53935;
-  --bg:#F6F3EA; --paper2:#EFEAD9; --card:#FFFFFF; --ink:#1C2B21; --mut:#67766B; --line:#E4DFCE;
-  --pine950:#0C2418; --pine800:#14402A; --tint:#E3F0E4;
-  --r:14px; --sh:0 2px 10px rgba(22,68,43,.08);
-  --serif:"Fraunces",Georgia,"Times New Roman",serif;
+  --bg:#EAF4EE; --paper2:#DCEBE1; --card:#FFFFFF; --ink:#0D1F16; --mut:#57705F; --line:#D5E5DA;
+  --pine950:#062A20; --pine800:#0A3B2C; --tint:#D7F0E2;
+  --r:14px; --sh:0 2px 10px rgba(8,122,86,.08);
+  --serif:"Bricolage Grotesque","Plus Jakarta Sans",system-ui,sans-serif;
   --sans:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
 }
 *{box-sizing:border-box}
@@ -46,14 +46,14 @@ button{font-family:inherit}
 .nav-links a:hover{background:#EDF3EA}
 .nav-links a.on{background:var(--nba);color:#fff}
 .btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:10px;padding:11px 20px;font-weight:700;font-size:14px;cursor:pointer}
-.btn-p{background:linear-gradient(135deg,#35A85C,#1E6B38);color:#fff;box-shadow:0 8px 20px rgba(46,158,82,.30)}
+.btn-p{background:linear-gradient(135deg,#10B981,#0A8A5C);color:#fff;box-shadow:0 8px 20px rgba(12,166,120,.30)}
 .btn-p:hover{background:var(--nba-d)}
 .btn-o{background:#fff;color:var(--nba);border:2px solid var(--nba)}
 .btn-g{background:var(--gold);color:#3A2A08}
 .btn-g:hover{filter:brightness(.96)}
 
 /* ── hero ── */
-.hero{background:linear-gradient(135deg,#16442B 0%,#1F5C39 55%,#2E7D46 100%);color:#fff;overflow:hidden;position:relative}
+.hero{background:linear-gradient(135deg,#0A6B4F 0%,#0B7A52 55%,#0CA678 100%);color:#fff;overflow:hidden;position:relative}.hero::after{content:"";position:absolute;width:520px;height:520px;right:-140px;top:-140px;background:radial-gradient(circle,rgba(255,138,61,.35),transparent 65%);pointer-events:none}
 .hero-in{display:grid;grid-template-columns:1.15fr .85fr;gap:26px;align-items:center;padding:56px 18px 64px}
 .kick{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:700;letter-spacing:.6px;margin-bottom:16px}
 .hero h1{font-size:clamp(30px,4.4vw,50px);line-height:1.12;margin:0 0 14px;letter-spacing:-.5px}
@@ -71,7 +71,7 @@ button{font-family:inherit}
 /* ── sections ── */
 .sec{padding:64px 0}
 .sec-h{text-align:center;max-width:640px;margin:0 auto 36px}
-.sec-h .tag{display:inline-block;font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--nba);background:#E3EFE2;padding:6px 14px;border-radius:999px;margin-bottom:12px}
+.sec-h .tag{display:inline-block;font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--nba);background:#D7F0E2;padding:6px 14px;border-radius:999px;margin-bottom:12px}
 .sec-h h2{font-size:30px;margin:0 0 10px;letter-spacing:-.4px}
 .sec-h p{color:var(--mut);margin:0}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
@@ -122,8 +122,8 @@ footer li{margin-bottom:7px}
 .copy{border-top:1px solid rgba(255,255,255,.14);padding-top:18px;font-size:12.5px;opacity:.7;text-align:center}
 
 /* ── auth ── */
-.auth{min-height:calc(100vh - 66px);display:grid;place-items:center;padding:40px 18px;background:linear-gradient(135deg,#EAF3E7,#F7FAF5)}
-.auth-card{background:#fff;border-radius:20px;box-shadow:0 14px 44px rgba(22,68,43,.14);padding:36px;width:100%;max-width:430px;text-align:center}
+.auth{min-height:calc(100vh - 66px);display:grid;place-items:center;padding:40px 18px;background:linear-gradient(135deg,#E2F1E8,#F4FAF6)}
+.auth-card{background:#fff;border-radius:20px;box-shadow:0 14px 44px rgba(8,122,86,.14);padding:36px;width:100%;max-width:430px;text-align:center}
 .auth-card img{height:64px;border-radius:12px;margin-bottom:10px}
 .auth-card h2{margin:6px 0 4px}
 .auth-card p{color:var(--mut);font-size:13.5px;margin:0 0 20px}
@@ -158,7 +158,7 @@ table.data td{padding:10px;border-bottom:1px solid #F1F5EF;white-space:nowrap}
 table.data td:first-child{font-weight:800;color:var(--nba-d);font-size:13.5px;letter-spacing:.3px}
 table.data tr:last-child td{border-bottom:0}
 .pill{display:inline-block;padding:3px 11px;border-radius:999px;font-size:11.5px;font-weight:700}
-.pill.g{background:#E5F4E8;color:#1C6B38}
+.pill.g{background:#DDF3E5;color:#1C6B38}
 .pill.o{background:#FFF3DF;color:#9A5B00}
 .pill.b{background:#E3F0FD;color:#1565C0}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
@@ -168,29 +168,29 @@ table.data tr:last-child td{border-bottom:0}
 .mobile-note{display:none}
 
 /* === mobile-app nasabah (bottom-tab) === */
-.phone{max-width:440px;margin:6px auto;background:#fff;border-radius:34px;box-shadow:0 24px 70px rgba(22,68,43,.20);overflow:hidden;border:1px solid var(--line);position:relative;min-height:min(880px,calc(100vh - 60px));display:flex;flex-direction:column}
+.phone{max-width:440px;margin:6px auto;background:#fff;border-radius:34px;box-shadow:0 24px 70px rgba(8,122,86,.20);overflow:hidden;border:1px solid var(--line);position:relative;min-height:min(880px,calc(100vh - 60px));display:flex;flex-direction:column}
 .apphead{display:flex;align-items:center;justify-content:space-between;padding:22px 22px 10px}
 .hi{font-size:12.5px;color:var(--mut)}
 .who{font-size:19px}
-.applogo{width:52px;height:52px;border-radius:16px;object-fit:cover;box-shadow:0 6px 16px rgba(22,68,43,.18)}
+.applogo{width:52px;height:52px;border-radius:16px;object-fit:cover;box-shadow:0 6px 16px rgba(8,122,86,.18)}
 .appbody{flex:1;overflow-y:auto;padding:6px 16px 110px;background:var(--bg);border-radius:26px 26px 0 0}
 .apptitle{margin:14px 4px 2px;font-size:21px}
 .appsub{margin:0 4px 14px;color:var(--mut);font-size:13px}
-.saldo-hero{background:linear-gradient(135deg,#2E9E52,#16442B);border-radius:26px;color:#fff;padding:20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 14px 30px rgba(22,68,43,.28);margin:8px 0 16px}
+.saldo-hero{background:linear-gradient(135deg,#0CA678,#0A6B4F);border-radius:26px;color:#fff;padding:20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 14px 30px rgba(8,122,86,.28);margin:8px 0 16px}
 .saldo-hero small{color:#CDE7D2;font-size:12px}
 .saldo-hero .snum{font-size:30px;font-weight:800;margin:4px 0;letter-spacing:.3px}
 .saldo-hero img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.5);flex:0 0 auto}
 .qgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-.qgrid button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:14px 4px;font-size:24px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;box-shadow:0 4px 12px rgba(22,68,43,.06)}
+.qgrid button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:14px 4px;font-size:24px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;box-shadow:0 4px 12px rgba(8,122,86,.06)}
 .qgrid button span:last-child{font-size:11px;font-weight:700;color:var(--ink)}
 .qgrid button:active{transform:scale(.95)}
-.molitip{background:linear-gradient(135deg,#FFF9E9,#fff);border:1px solid #F0DFAE}
+.molitip{background:linear-gradient(135deg,#FFF4E8,#fff);border:1px solid #F5D9B8}
 .molitip p{font-size:13px;color:#7A5B1E;margin:0}
 .npanel .panel{margin-bottom:16px}
 .npanel .steps{gap:12px;margin-bottom:16px}
 #stepsApp .step{border:1px solid var(--line);border-top:none;border-radius:14px;box-shadow:var(--sh);overflow:hidden;background:#fff}
 #stepsApp .step .n{background:var(--nba);color:#fff;font-size:11px;font-weight:800;padding:5px 12px;display:inline-block;border-radius:0 0 10px 0}
-.tabbar{position:fixed;left:50%;transform:translateX(-50%);width:min(412px,calc(100vw - 28px));bottom:calc(14px + env(safe-area-inset-bottom));background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:26px;display:flex;box-shadow:0 12px 32px rgba(22,68,43,.16);padding:8px;z-index:40}
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);width:min(412px,calc(100vw - 28px));bottom:calc(14px + env(safe-area-inset-bottom));background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:26px;display:flex;box-shadow:0 12px 32px rgba(8,122,86,.16);padding:8px;z-index:40}
 .tabbar button{flex:1;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:#9AA5A0;padding:9px 2px;border-radius:18px;cursor:pointer}
 .tabbar button .ti{font-size:21px}
 .tabbar button.on{color:var(--nba-d);background:#E7F3EA}
@@ -200,9 +200,9 @@ table.data tr:last-child td{border-bottom:0}
 .ptabs-app{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 14px;scrollbar-width:none}
 .ptabs-app::-webkit-scrollbar{display:none}
 .ptabs-app button{flex:0 0 auto;border:0;border-radius:999px;padding:10px 18px;font-size:13px;font-weight:700;background:#E9F0E9;color:var(--mut);cursor:pointer}
-.ptabs-app button.on{background:linear-gradient(135deg,#35A85C,#1E6B38);color:#fff;box-shadow:0 6px 14px rgba(46,158,82,.30)}
+.ptabs-app button.on{background:linear-gradient(135deg,#10B981,#0A8A5C);color:#fff;box-shadow:0 6px 14px rgba(12,166,120,.30)}
 .profile-head{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:24px;padding:18px;margin:10px 0 16px;box-shadow:var(--sh)}
-.avatar{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#35A85C,#1E6B38);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;flex:0 0 auto;box-shadow:0 8px 18px rgba(46,158,82,.30)}
+.avatar{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#10B981,#0A8A5C);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;flex:0 0 auto;box-shadow:0 8px 18px rgba(12,166,120,.30)}
 .profile-head b{font-size:17px;display:block}
 .profile-head small{color:var(--mut);font-size:12.5px}
 .profile-head .pill{margin-left:auto}
@@ -216,11 +216,11 @@ table.data tr:last-child td{border-bottom:0}
 }
 
 /* === banner install PWA === */
-.pwa-banner{display:none;align-items:center;gap:12px;background:linear-gradient(135deg,#1E6B38,#35A85C);color:#fff;border-radius:20px;padding:14px 16px;margin:14px 0;box-shadow:0 10px 24px rgba(30,107,56,.35);position:relative}
+.pwa-banner{display:none;align-items:center;gap:12px;background:linear-gradient(135deg,#0A8A5C,#10B981);color:#fff;border-radius:20px;padding:14px 16px;margin:14px 0;box-shadow:0 10px 24px rgba(10,138,92,.35);position:relative}
 .pwa-banner .pwa-ic{font-size:30px;flex:0 0 auto}
 .pwa-banner b{display:block;font-size:14.5px}
 .pwa-banner span{font-size:12.5px;opacity:.88}
-.pwa-banner .btn{margin-left:auto;flex:0 0 auto;background:#fff;color:#1E6B38;border:0;padding:10px 18px}
+.pwa-banner .btn{margin-left:auto;flex:0 0 auto;background:#fff;color:#0A8A5C;border:0;padding:10px 18px}
 .pwa-x{position:absolute;top:4px;right:8px;background:none;border:0;color:#fff;opacity:.75;font-size:19px;cursor:pointer;line-height:1;padding:6px}
 @media(display-mode:standalone){.pwa-banner{display:none !important}}
 
@@ -247,6 +247,19 @@ table.data tr:last-child td{border-bottom:0}
 .modal-ov.show{opacity:1}
 .modal{background:#fff;border-radius:24px;max-width:520px;width:100%;max-height:92vh;overflow-y:auto;padding:26px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
 .modal h2{margin:0 0 4px;font-size:20px}
+/* dialog custom pengganti alert/confirm native */
+.dlg{text-align:center;padding:8px 4px}
+.dlg-ic{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px}
+.dlg-ic.ok{background:#D7F0E2;color:#0A6B4F}
+.dlg-ic.err{background:#FDE7E7;color:#E53935}
+.dlg-ic.info{background:#E3F0FF;color:#1E88E5}
+.dlg-ic.warn{background:#FFF3E0;color:#F59E0B}
+.dlg h3{margin:0 0 6px;font-size:17px}
+.dlg p{margin:0 0 20px;color:var(--mut);font-size:14px}
+.dlg-btns{display:flex;gap:10px;justify-content:center}
+.dlg-btns .btn{min-width:110px}
+.btn-danger{background:#E53935;color:#fff;border:0;border-radius:12px;padding:12px 20px;font-weight:700;font-size:14px;cursor:pointer}
+.btn-ghost{background:#F0F4EF;color:var(--ink);border:0;border-radius:12px;padding:12px 20px;font-weight:700;font-size:14px;cursor:pointer}
 .modal .msub{color:var(--mut);font-size:13px;margin:0 0 18px}
 .modal .mclose{float:right;border:0;background:#F0F4EF;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer}
 .formrow{margin-bottom:12px}
@@ -261,19 +274,19 @@ table.data tr:last-child td{border-bottom:0}
 .wz-steps{display:flex;gap:6px;margin-bottom:20px}
 .wz-steps span{flex:1;height:6px;border-radius:3px;background:#E7EFE8}
 .wz-steps span.on{background:var(--nba)}
-.scale-display{background:linear-gradient(135deg,#16442B,#0E2F1D);border-radius:20px;color:#fff;text-align:center;padding:30px 20px;margin-bottom:16px}
+.scale-display{background:linear-gradient(135deg,#0A6B4F,#073B2C);border-radius:20px;color:#fff;text-align:center;padding:30px 20px;margin-bottom:16px}
 .scale-display .wval{font-size:52px;font-weight:800;letter-spacing:1px}
 .scale-display small{color:#9FD0A8;font-size:13px}
-.scanline{height:120px;border-radius:16px;background:linear-gradient(180deg,#EAF4EC,#DCE9DC);position:relative;overflow:hidden;margin-bottom:16px}
+.scanline{height:120px;border-radius:16px;background:linear-gradient(180deg,#E2F1E8,#D5E8DC);position:relative;overflow:hidden;margin-bottom:16px}
 .scanline::after{content:"";position:absolute;left:0;right:0;height:4px;background:var(--nba);box-shadow:0 0 18px var(--nba);animation:scan 1.4s ease-in-out infinite}
 @keyframes scan{0%{top:0}50%{top:calc(100% - 4px)}100%{top:0}}
-.nfc-card{background:linear-gradient(135deg,#1E6B38,#16442B);border-radius:20px;color:#fff;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;cursor:pointer;transition:transform .2s}
+.nfc-card{background:linear-gradient(135deg,#0A8A5C,#0A6B4F);border-radius:20px;color:#fff;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;cursor:pointer;transition:transform .2s}
 .nfc-card:active{transform:scale(.97)}
 .nfc-card .chip{width:46px;height:34px;border-radius:8px;background:linear-gradient(135deg,#F5D76E,#E8A93D);margin-bottom:14px}
 .nfc-card small{color:#BFE3C6}
 .nfc-card b{font-size:18px;letter-spacing:2px}
 .nfc-ring{position:absolute;right:-30px;top:-30px;width:130px;height:130px;border:18px solid rgba(255,255,255,.08);border-radius:50%}
-@keyframes tapPulse{0%{box-shadow:0 0 0 0 rgba(46,158,82,.5)}100%{box-shadow:0 0 0 26px rgba(46,158,82,0)}}
+@keyframes tapPulse{0%{box-shadow:0 0 0 0 rgba(12,166,120,.5)}100%{box-shadow:0 0 0 26px rgba(12,166,120,0)}}
 .tapped{animation:tapPulse .7s ease-out 2}
 .receipt{background:#fff;border:1px dashed #B9C9BC;border-radius:6px;padding:22px;font-family:ui-monospace,monospace;font-size:13px}
 .receipt h3{text-align:center;margin:0 0 2px;font-family:inherit}
@@ -317,7 +330,7 @@ table.data tr:last-child td{border-bottom:0}
 .histitem small{color:var(--mut)}
 
 /* === kartu anggota === */
-.mcard{background:linear-gradient(135deg,#20703C,#0E3B20);border-radius:18px;padding:18px;color:#fff;box-shadow:var(--sh);position:relative;overflow:hidden}
+.mcard{background:linear-gradient(135deg,#0A7A50,#073B2C);border-radius:18px;padding:18px;color:#fff;box-shadow:var(--sh);position:relative;overflow:hidden}
 .mcard::after{content:"";position:absolute;right:-44px;top:-44px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.07)}
 .mcard-top{display:flex;align-items:center;gap:12px;margin-bottom:16px;position:relative;z-index:1}
 .mcard-logo{width:44px;height:44px;border-radius:12px;object-fit:cover;background:#fff}
@@ -340,14 +353,14 @@ table.data tr:last-child td{border-bottom:0}
 .mapsearch input{width:100%;padding:12px 16px 12px 42px;border-radius:14px;border:1px solid var(--line);font-size:14px;background:#fff}
 .mapsearch input:focus{outline:2px solid var(--nba);outline-offset:1px;border-color:var(--nba)}
 .msear{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:17px;pointer-events:none}
-.mapresults{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px rgba(22,68,43,.18);z-index:600;overflow:hidden}
+.mapresults{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px rgba(8,122,86,.18);z-index:600;overflow:hidden}
 .mapresults button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:11px 14px;border:0;background:#fff;cursor:pointer;font-size:13.5px;border-bottom:1px solid #F0F4EF}
 .mapresults button:last-child{border-bottom:0}
 .mapresults button:hover{background:#F0F7F1}
 .mapresults button b{font-weight:800;color:var(--nba-d)}
 .mapresults button .pill{margin-left:auto}
 .mr-empty{padding:12px 14px;color:var(--mut);font-size:13px}
-.lpin.sel{outline:3px solid #fff;box-shadow:0 0 0 6px rgba(46,158,82,.45),0 8px 20px rgba(0,0,0,.30);transform:scale(1.18)}
+.lpin.sel{outline:3px solid #fff;box-shadow:0 0 0 6px rgba(12,166,120,.45),0 8px 20px rgba(0,0,0,.30);transform:scale(1.18)}
 .stcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-top:12px;box-shadow:var(--sh)}
 .stcard h3{margin:0 0 2px;font-size:16px}
 .stcard .msub{color:var(--mut);font-size:12.5px;margin:0 0 12px}
@@ -404,7 +417,7 @@ table.data{font-variant-numeric:tabular-nums}
   #view-nasabah{padding:0 !important}
   .phone{max-width:none;margin:0;border-radius:0;border:0;min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:248px 1fr;grid-template-rows:auto 1fr}
   .apphead{grid-column:2;grid-row:1;padding:26px 32px 4px;align-self:start}
-  .tabbar{grid-column:1;grid-row:1/span 2;position:static;width:auto;transform:none;margin:0;left:auto;right:auto;bottom:auto;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;border:0;border-radius:0;padding:22px 16px 18px;color:#cfe0d2;background:radial-gradient(130% 55% at 50% 0%,rgba(124,179,66,.20),transparent 62%),linear-gradient(172deg,#0b2a17 0%,#123f24 58%,#15492a 100%)}
+  .tabbar{grid-column:1;grid-row:1/span 2;position:static;width:auto;transform:none;margin:0;left:auto;right:auto;bottom:auto;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;border:0;border-radius:0;padding:22px 16px 18px;color:#cfe0d2;background:radial-gradient(130% 55% at 50% 0%,rgba(52,211,153,.20),transparent 62%),linear-gradient(172deg,#062A20 0%,#0A3B2C 58%,#0C4A34 100%)}
   .nsbrand{display:flex;align-items:center;gap:12px;padding:2px 8px 20px}
   .nslogo{width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.13);display:flex;align-items:center;justify-content:center;font-size:21px;flex:0 0 auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
   .nstitle{font-weight:800;color:#fff;font-size:16.5px;line-height:1.15;letter-spacing:-.01em}
@@ -416,7 +429,7 @@ table.data{font-variant-numeric:tabular-nums}
   .tabbar button.on .ti{background:#e7f3ea;box-shadow:none}
   .tabbar button:not(.on):hover{background:rgba(255,255,255,.08)}
   .nsuser{display:flex;align-items:center;gap:11px;margin-top:auto;padding:12px 10px 4px;border-top:1px solid rgba(255,255,255,.12)}
-  .nsava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#35a85c,#1e6b38);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex:0 0 auto;box-shadow:0 6px 14px rgba(0,0,0,.30)}
+  .nsava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#10B981,#1e6b38);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex:0 0 auto;box-shadow:0 6px 14px rgba(0,0,0,.30)}
   .nsuinfo{min-width:0;flex:1}
   .nsuinfo b{display:block;color:#fff;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .nsuinfo small{display:block;color:#9fc3a8;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1223,7 +1236,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <p>Perjalanan sampah dalam ekosistem NBA — dikumpulkan, ditimbang, diagregasi, lalu diolah industri menjadi produk baru.</p>
   </div>
   <div class="cycle">
-    <div class="cstep rv"><span class="cnum">1</span><div class="cic" style="background:#E5F4E8">🏠</div><h3>Warga</h3><p>Warga membawa sampah dari rumah ke titik S-cale terdekat, lalu menyetor dengan kartu NFC — tidak perlu dipilah dulu dari rumah.</p></div>
+    <div class="cstep rv"><span class="cnum">1</span><div class="cic" style="background:#DDF3E5">🏠</div><h3>Warga</h3><p>Warga membawa sampah dari rumah ke titik S-cale terdekat, lalu menyetor dengan kartu NFC — tidak perlu dipilah dulu dari rumah.</p></div>
     <div class="carr">➜</div>
     <div class="cstep rv"><span class="cnum">2</span><div class="cic" style="background:#E3F0FD">⚖️</div><h3>Bank Sampah Unit</h3><p>Sampah ditimbang otomatis, lalu AI memilah dan mengklasifikasi jenisnya — plastik, kertas, logam, organik. Nilai rupiah langsung masuk ke saldo tabungan nasabah.</p></div>
     <div class="carr">➜</div>
@@ -1251,12 +1264,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <h2>Peta Titik Timbangan</h2>
     <p>12 titik S-cale tersebar di Surakarta. Hijau = online, merah = offline, kuning = maintenance.</p>
   </div>
+  <div class="mapsearch" style="max-width:520px;margin:0 0 14px"><input id="landingCari" placeholder="Cari nama / ID stasiun…" oninput="cariStasiunLanding()" autocomplete="off"><span class="msear">🔍</span><div id="landingHasil" class="mapresults" style="display:none"></div></div>
   <div class="mapbox">
       <div id="leafletMap" class="leaflet-box"></div>
       <div class="map-legend">
-        <span><span class="dot" style="background:#2E9E4F"></span>Online</span>
+        <span><span class="dot" style="background:#0CA678"></span>Online</span>
         <span><span class="dot" style="background:#E53935"></span>Offline</span>
-        <span><span class="dot" style="background:#F9A825"></span>Maintenance</span>
+        <span><span class="dot" style="background:#F59E0B"></span>Maintenance</span>
       </div>
     </div>
 </div></section>
@@ -1264,11 +1278,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <section class="sec" id="berita" style="background:#fff"><div class="wrap">
   <div class="sec-h"><span class="tag">KABAR</span><h2>Berita Terkini</h2><p>Kegiatan dan edukasi seputar pengelolaan sampah.</p></div>
   <div class="news">
-    <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#2E9E4F,#7CB342)">♻️</div>
+    <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#0CA678,#34D399)">♻️</div>
       <div class="b"><span class="date">28 Sep 2026</span><h3>12 Titik S-cale Resmi Beroperasi di Surakarta</h3><p>Serah terima perangkat tahap pertama selesai, 340 warga terdaftar sebagai nasabah.</p></div></div>
     <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#1E88E5,#64B5F6)">📰</div>
       <div class="b"><span class="date">15 Sep 2026</span><h3>Harga Kardus Naik, Cek Daftar Terbaru</h3><p>Penyesuaian harga beli sampah kertas mengikuti harga pasar pengelola bank sampah bulan ini.</p></div></div>
-    <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#F59E0B,#F9A825)">🎓</div>
+    <div class="card"><div class="thumb" style="background:linear-gradient(135deg,#F59E0B,#F59E0B)">🎓</div>
       <div class="b"><span class="date">02 Sep 2026</span><h3>Sosialisasi Pilah Sampah di 6 Kelurahan</h3><p>Tim NBA edukasi 500+ warga soal memilah plastik, kertas, dan organik dari rumah.</p></div></div>
   </div>
 </div></section>
@@ -1276,7 +1290,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <section class="sec"><div class="wrap">
   <div class="sec-h"><span class="tag">VISI MISI</span><h2>Kenapa NBA Ada</h2></div>
   <div class="grid3">
-    <div class="card"><div class="icb" style="background:#E5F4E8">🎯</div><h3>Visi</h3><p>Menjadi bank sampah digital terdepan yang mengubah sampah menjadi kesejahteraan warga.</p></div>
+    <div class="card"><div class="icb" style="background:#DDF3E5">🎯</div><h3>Visi</h3><p>Menjadi bank sampah digital terdepan yang mengubah sampah menjadi kesejahteraan warga.</p></div>
     <div class="card"><div class="icb" style="background:#E3F0FD">🤝</div><h3>Misi</h3><p>Memudahkan warga menabung sampah lewat teknologi: timbang cerdas, harga transparan, saldo real-time.</p></div>
     <div class="card"><div class="icb" style="background:#FFF3DF">🌱</div><h3>Dampak</h3><p>3,5 ton sampah teralihkan dari TPA dan Rp 14,2 juta tersalurkan ke nasabah sejak 2025.</p></div>
   </div>
@@ -1310,7 +1324,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </div>
 
 <!-- ══════════ DASHBOARD NASABAH ══════════ -->
-<div id="view-nasabah" style="display:none;background:linear-gradient(180deg,#E9F4EB,#F7FAF6);min-height:100vh;padding:18px 12px">
+<div id="view-nasabah" style="display:none;background:linear-gradient(180deg,#E4F2EA,#F4FAF6);min-height:100vh;padding:18px 12px">
 <div class="phone">
   <div class="apphead">
     <div><div class="hi">Selamat datang kembali</div><b class="who">Andi</b></div>
@@ -1343,7 +1357,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="npanel" id="np-setor" style="display:none">
       <h2 class="apptitle">Setor Sampah</h2>
       <p class="appsub">Ikuti langkahnya di timbangan S-cale terdekat.</p>
-      <div class="panel" style="background:linear-gradient(135deg,#1E6B38,#16442B);border:0;color:#fff">
+      <div class="panel" style="background:linear-gradient(135deg,#0A8A5C,#0A6B4F);border:0;color:#fff">
         <h3 style="color:#fff">⚖️ Simulasi Timbangan</h3>
         <p style="color:#CDE7D2;font-size:13px;margin:0 0 14px">Coba alur lengkap: <b style="color:#fff">S-Cell</b> menimbang &rarr; <b style="color:#fff">S-Eye</b> mendeteksi AI &rarr; <b style="color:#fff">S-Tap</b> membaca NFC &rarr; <b style="color:#fff">S-Box</b> menampung per kategori.</p>
         <button class="btn" style="background:#fff;color:var(--nba-d);width:auto;border-radius:14px;padding:12px 26px;font-weight:800;display:inline-flex;align-items:center;gap:8px" onclick="openSimulasi()">Mulai Simulasi <span aria-hidden="true">→</span></button>
@@ -1491,9 +1505,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
       <div class="mapbox">
       <div id="leafletMapAdmin" class="leaflet-box"></div>
       <div class="map-legend">
-        <span><span class="dot" style="background:#2E9E4F"></span>Online</span>
+        <span><span class="dot" style="background:#0CA678"></span>Online</span>
         <span><span class="dot" style="background:#E53935"></span>Offline</span>
-        <span><span class="dot" style="background:#F9A825"></span>Maintenance</span>
+        <span><span class="dot" style="background:#F59E0B"></span>Maintenance</span>
       </div>
     </div>
       <div id="stasiunCard" class="stcard" style="display:none"></div>
