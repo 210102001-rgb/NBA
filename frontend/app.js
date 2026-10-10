@@ -943,8 +943,8 @@ async function doLogin(){
     const r = await apiPost("/auth/login", { username: u, password: p });
     ME = mapUser(r.user);
     await loadServerData();
-    l.classList.remove("show"); setTimeout(()=>{ l.style.display = "none"; }, 280);
     renderAll();
+    /* loader dibiarkan menyala terus sampai loginAs selesai transisi — tidak ada kedip balik ke halaman login */
     loginAs(ME.role === "admin" ? "admin" : "nasabah");
   }catch(e){
     l.classList.remove("show"); setTimeout(()=>{ l.style.display = "none"; }, 280);
