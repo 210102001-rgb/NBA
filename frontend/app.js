@@ -1186,7 +1186,7 @@ function beritaForm(i){
     <h2>${i==null?"Tulis":"Ubah"} Berita</h2><p class="msub">Tampil di landing page.</p>
     <div class="formrow"><label>Judul</label><input id="brJudul" value="${b.judul.replace(/"/g,"&quot;")}"></div>
     <div class="formrow"><label>Isi</label><textarea id="brIsi" rows="3">${b.isi}</textarea></div>
-    <div class="formrow"><label>Gambar <span style="font-weight:400">(link foto, opsional)</span></label><input id="brGambar" value="${(b.gambar||"").replace(/"/g,"&quot;")}" placeholder="https://…" oninput="document.getElementById('brPrev').src=this.value;document.getElementById('brPrev').style.display=this.value?'block':'none'"><img id="brPrev" src="${(b.gambar||"").replace(/"/g,"&quot;")}" style="display:${b.gambar?"block":"none"};width:100%;height:120px;object-fit:cover;border-radius:10px;margin-top:8px"></div>
+    <div class="formrow"><label>Gambar <span style="font-weight:400">(upload atau link, opsional)</span></label><div style="display:flex;gap:8px;margin-bottom:8px"><input type="file" id="brFile" accept="image/jpeg,image/png,image/webp" style="flex:1;min-width:0"><button type="button" class="btn btn-o" id="brUpBtn" onclick="uploadBeritaGambar()">Upload</button></div><input id="brGambar" value="${(b.gambar||"").replace(/"/g,"&quot;")}" placeholder="https://…" oninput="document.getElementById('brPrev').src=this.value;document.getElementById('brPrev').style.display=this.value?'block':'none'"><img id="brPrev" src="${(b.gambar||"").replace(/"/g,"&quot;")}" style="display:${b.gambar?"block":"none"};width:100%;height:120px;object-fit:cover;border-radius:10px;margin-top:8px"></div>
     <div class="formrow"><label>Warna kartu</label><div class="swatches" id="brSwatches">${palet.map(p=>`<button type="button" class="sw${p===b.warna?" on":""}" data-w="${p}" style="background:${p}" onclick="pickWarna(this)" title="${p}"></button>`).join("")}</div><input type="hidden" id="brWarna" value="${b.warna}"></div>
     <div class="btnrow"><button class="btn btn-o" onclick="closeModal()">Batal</button>
     <button class="btn btn-p" onclick="saveBerita(${i==null?"null":i})">Simpan</button></div>`);
@@ -1195,6 +1195,24 @@ function pickWarna(el){
   document.querySelectorAll("#brSwatches .sw").forEach(x=>x.classList.remove("on"));
   el.classList.add("on");
   document.getElementById("brWarna").value = el.dataset.w;
+}
+async function uploadBeritaGambar(){
+  const inp = document.getElementById("brFile");
+  if(!inp || !inp.files.length){ showAlert("Pilih file foto dulu.", "warn"); return; }
+  const btn = document.getElementById("brUpBtn");
+  btn.disabled = true; const t0 = btn.textContent; btn.textContent = "Mengunggah…";
+  try{
+    const fd = new FormData(); fd.append("file", inp.files[0]);
+    const r = await fetch(API + "/upload", { method: "POST", body: fd, credentials: "include" });
+    const j = await r.json().catch(()=>({}));
+    if(!r.ok || !j.ok) throw new Error((j && j.error) || ("HTTP " + r.status));
+    const url = API + "/uploads/" + j.file;
+    document.getElementById("brGambar").value = url;
+    const prev = document.getElementById("brPrev");
+    prev.src = url; prev.style.display = "block";
+    showAlert("Foto terupload.", "ok");
+  }catch(e){ showAlert("Upload gagal: " + e.message, "err"); }
+  btn.disabled = false; btn.textContent = t0;
 }
 async function saveBerita(i){
   const judul = document.getElementById("brJudul").value.trim();
