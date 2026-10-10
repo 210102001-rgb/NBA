@@ -145,12 +145,29 @@ function fmtTgl(){
 }
 
 /* ═══ render ═══ */
+/* Tab aktif disimpan di URL hash (#admin-trx) agar refresh tetap di halaman yang sama */
+const ADMIN_TABS = ["dash","peta","trx","nasabah","stasiun","harga","lap","berita"];
+const NP_TABS = ["beranda","setor","riwayat","harga","akun"];
+function readHashTab(view){
+  const m = (location.hash||"").match(/^#([a-z]+)-([a-z]+)$/);
+  if(!m || m[1]!==view) return null;
+  const valid = view==="admin" ? ADMIN_TABS : NP_TABS;
+  return valid.includes(m[2]) ? m[2] : null;
+}
+function writeHashTab(view, tab){
+  try{ history.replaceState(null,"","#"+view+"-"+tab); }catch(e){}
+}
+function clearHashTab(){
+  try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}
+}
+function restoreAdminTab(){ goAdminTab(readHashTab("admin") || "dash"); }
 function go(v){
   ["landing","masuk","nasabah","admin"].forEach(k=>{
     document.getElementById("view-"+k).style.display = k===v ? "" : "none";
   });
   document.querySelectorAll(".nav-links a").forEach(a=>a.classList.remove("on"));
-  if(v === "nasabah" && typeof showNp === "function") showNp("beranda");
+  if(v === "nasabah" && typeof showNp === "function") showNp(readHashTab("nasabah") || "beranda");
+  if(v === "admin") restoreAdminTab();
   animateIn(document.getElementById("view-"+v), "anim-fade");
   window.scrollTo(0,0);
 }
@@ -180,6 +197,7 @@ function countUp(el, target){
   requestAnimationFrame(f);
 }
 function showNp(k){
+  writeHashTab("nasabah", k);
   ["beranda","setor","riwayat","harga","akun"].forEach(x=>{
     const p = document.getElementById("np-"+x);
     p.style.display = x===k ? "" : "none";
@@ -561,12 +579,19 @@ async function init(){
   document.getElementById("modalOv").addEventListener("click", e=>{ if(e.target.id==="modalOv") closeModal(); });
   document.querySelectorAll(".slink[data-ap]").forEach(b=>b.addEventListener("click",()=>{
     document.querySelectorAll(".slink[data-ap]").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+    writeHashTab("admin", b.dataset.ap);
     ["dash","peta","trx","nasabah","stasiun","harga","lap","berita"].forEach(k=>{
       const p = document.getElementById("ap-"+k);
       p.style.display = k===b.dataset.ap ? "" : "none";
       if(k===b.dataset.ap){ animateIn(p, "anim-up"); if(k==="peta") refreshAdminMap(); }
     });
   }));
+  /* Refresh: kalau sesi masih valid & URL menunjuk tab, kembali ke halaman terakhir */
+  if(ME){
+    const vw = readHashTab("admin") ? "admin" : (readHashTab("nasabah") ? "nasabah" : null);
+    if(vw === "admin" && ME.role === "admin") go("admin");
+    else if(vw === "nasabah" && ME.role !== "admin") go("nasabah");
+  }
 }
 /* ═══ fitur v2 · bagian 1: modal, notifikasi, detail, struk, QR ═══ */
 function openModal(html){
@@ -928,7 +953,7 @@ async function doLogin(){
 }
 async function logout(){
   try{ await apiPost("/auth/logout"); }catch(e){}
-  ME = null; go("landing");
+  ME = null; clearHashTab(); go("landing");
   try{
     const c = JSON.parse(localStorage.getItem(SERVER_CACHE_KEY) || "null");
     if(c){ c.ME = null; c.users = []; c.transaksi = []; localStorage.setItem(SERVER_CACHE_KEY, JSON.stringify(c)); }
