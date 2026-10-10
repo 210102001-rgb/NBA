@@ -143,6 +143,11 @@ footer li{margin-bottom:7px}
 .slink:hover{background:rgba(255,255,255,.08)}
 .slink.on{background:#fff;color:var(--nba-d)}
 .slink .e{font-size:17px}
+.sbrand span{line-height:1.2}
+.sbrand small{display:block;font-size:9.5px;font-weight:700;color:#8fae94;letter-spacing:.1em;margin-top:2px}
+.slabel{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8fae94;padding:16px 12px 6px}
+.sfoot{border-top:1px solid rgba(255,255,255,.12);padding-top:10px;margin-top:10px}
+@media(min-width:901px){.side{position:sticky;top:0;height:100vh;align-self:start;overflow-y:auto;scrollbar-width:thin}}
 .main{padding:26px;max-width:1080px}
 .main h1{margin:0 0 4px;font-size:23px}
 .main .sub{color:var(--mut);font-size:13.5px;margin:0 0 20px}
@@ -417,7 +422,7 @@ table.data{font-variant-numeric:tabular-nums}
   #view-nasabah{padding:0 !important}
   .phone{max-width:none;margin:0;border-radius:0;border:0;min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:248px 1fr;grid-template-rows:auto 1fr}
   .apphead{grid-column:2;grid-row:1;padding:26px 32px 4px;align-self:start}
-  .tabbar{grid-column:1;grid-row:1/span 2;position:static;width:auto;transform:none;margin:0;left:auto;right:auto;bottom:auto;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;border:0;border-radius:0;padding:22px 16px 18px;color:#cfe0d2;background:radial-gradient(130% 55% at 50% 0%,rgba(52,211,153,.20),transparent 62%),linear-gradient(172deg,#062A20 0%,#0A3B2C 58%,#0C4A34 100%)}
+  .tabbar{grid-column:1;grid-row:1/span 2;position:sticky;top:0;height:100vh;align-self:start;overflow-y:auto;width:auto;transform:none;margin:0;left:auto;right:auto;bottom:auto;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;border:0;border-radius:0;padding:22px 16px 18px;color:#cfe0d2;background:radial-gradient(130% 55% at 50% 0%,rgba(52,211,153,.20),transparent 62%),linear-gradient(172deg,#062A20 0%,#0A3B2C 58%,#0C4A34 100%)}
   .nsbrand{display:flex;align-items:center;gap:12px;padding:2px 8px 20px}
   .nslogo{width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.13);display:flex;align-items:center;justify-content:center;font-size:21px;flex:0 0 auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
   .nstitle{font-weight:800;color:#fff;font-size:16.5px;line-height:1.15;letter-spacing:-.01em}
@@ -468,6 +473,8 @@ table.data{font-variant-numeric:tabular-nums}
   .side{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));top:auto;z-index:40;flex-direction:row;overflow-x:auto;padding:8px;gap:6px;align-items:center;scrollbar-width:none;background:linear-gradient(172deg,#062A20 0%,#0A3B2C 70%);border-radius:22px;box-shadow:0 12px 32px rgba(6,42,32,.38)}
   .side::-webkit-scrollbar{display:none}
   .side .sbrand{display:none}
+  .side .slabel{display:none}
+  .side .sfoot{display:contents;border:0;padding:0;margin:0}
   .side>span[style]{display:none}
   .slink{width:auto;flex:0 0 auto;white-space:nowrap;padding:10px 12px;font-size:12px;border-radius:14px}
   .slink .e{font-size:16px}
@@ -1450,18 +1457,22 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <div id="view-admin" style="display:none">
 <div class="dash">
   <aside class="side">
-    <div class="sbrand"><img data-asset="logo" src="" alt=""> NBA Admin</div>
+    <div class="sbrand"><img data-asset="logo" src="" alt=""><span>NBA<small>ADMIN PANEL</small></span></div>
+    <div class="slabel">Operasional</div>
     <button class="slink on" data-ap="dash"><span class="e">📊</span>Dashboard</button>
     <button class="slink" data-ap="peta"><span class="e">🗺️</span>Peta Timbangan</button>
     <button class="slink" data-ap="trx"><span class="e">🧾</span>Transaksi</button>
+    <button class="slink" data-ap="lap"><span class="e">📑</span>Laporan</button>
+    <div class="slabel">Data Master</div>
     <button class="slink" data-ap="nasabah"><span class="e">👥</span>Nasabah</button>
     <button class="slink" data-ap="stasiun"><span class="e">⚙️</span>Data Stasiun</button>
     <button class="slink" data-ap="harga"><span class="e">💲</span>Data Harga</button>
-    <button class="slink" data-ap="lap"><span class="e">📑</span>Laporan</button>
     <button class="slink" data-ap="berita"><span class="e">📰</span>Berita</button>
     <span style="flex:1"></span>
+    <div class="sfoot">
     <button class="slink" onclick="gantiPassForm()"><span class="e">🔑</span>Ganti Password</button>
 <button class="slink" onclick="go('landing')"><span class="e">🚪</span>Keluar</button>
+    </div>
   </aside>
   <div class="main">
     <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-bottom:4px">
