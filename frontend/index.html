@@ -198,6 +198,7 @@ table.data tr:last-child td{border-bottom:0}
 .tabbar{position:fixed;left:50%;transform:translateX(-50%);width:min(412px,calc(100vw - 28px));bottom:calc(14px + env(safe-area-inset-bottom));background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:26px;display:flex;box-shadow:0 12px 32px rgba(8,122,86,.16);padding:8px;z-index:40}
 .tabbar button{flex:1;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:#9AA5A0;padding:9px 2px;border-radius:18px;cursor:pointer}
 .tabbar button .ti{font-size:21px}
+.tabbar button .ti svg{width:23px;height:23px;display:block}
 .tabbar button.on{color:var(--nba-d);background:#E7F3EA}
 .nsbrand,.nsuser{display:none}
 .nsnav{display:contents}
@@ -422,24 +423,32 @@ table.data{font-variant-numeric:tabular-nums}
   #view-nasabah{padding:0 !important}
   .phone{max-width:none;margin:0;border-radius:0;border:0;overflow:visible;min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:248px 1fr;grid-template-rows:auto 1fr}
   .apphead{grid-column:2;grid-row:1;padding:26px 32px 4px;align-self:start}
-  .tabbar{grid-column:1;grid-row:1/span 2;position:sticky;top:0;height:100vh;height:100dvh;align-self:start;overflow:visible;width:auto;transform:none;margin:0;left:auto;right:auto;bottom:auto;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;border:0;border-radius:0;padding:22px 16px 18px;color:#cfe0d2;background:radial-gradient(130% 55% at 50% 0%,rgba(52,211,153,.20),transparent 62%),linear-gradient(172deg,#062A20 0%,#0A3B2C 58%,#0C4A34 100%)}
-  .nsbrand{display:flex;align-items:center;gap:12px;padding:2px 8px 20px}
-  .nslogo{width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.13);display:flex;align-items:center;justify-content:center;font-size:21px;flex:0 0 auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
-  .nstitle{font-weight:800;color:#fff;font-size:16.5px;line-height:1.15;letter-spacing:-.01em}
-  .nstitle small{display:block;font-size:10.5px;font-weight:600;color:#9fc3a8;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
-  .nsnav{display:flex;flex-direction:column;gap:6px}
-  .tabbar button{flex:0 0 auto;flex-direction:row;justify-content:flex-start;align-items:center;gap:12px;font-size:13.5px;font-weight:600;padding:9px 10px;color:inherit;background:transparent;border-radius:13px;width:100%;text-align:left}
-  .tabbar button .ti{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.10);display:flex;align-items:center;justify-content:center;font-size:17px;flex:0 0 auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
-  .tabbar button.on{background:#fff;color:#0e3320;box-shadow:0 10px 24px rgba(0,0,0,.28)}
-  .tabbar button.on .ti{background:#e7f3ea;box-shadow:none}
-  .tabbar button:not(.on):hover{background:rgba(255,255,255,.08)}
-  .nsuser{display:flex;align-items:center;gap:11px;margin-top:auto;padding:12px 10px 4px;border-top:1px solid rgba(255,255,255,.12)}
-  .nsava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#10B981,#1e6b38);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex:0 0 auto;box-shadow:0 6px 14px rgba(0,0,0,.30)}
-  .nsuinfo{min-width:0;flex:1}
-  .nsuinfo b{display:block;color:#fff;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .nsuinfo small{display:block;color:#9fc3a8;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .nsout{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff;width:34px;height:34px;border-radius:10px;font-size:16px;cursor:pointer;flex:0 0 auto}
-  .nsout:hover{background:rgba(255,255,255,.16)}
+  .apphead .hi{font-size:13px;font-weight:500;color:#7A8F7E;margin-bottom:2px}
+  .apphead b.who{font-family:var(--font-display,"Bricolage Grotesque",sans-serif);font-size:26px;font-weight:800;letter-spacing:-.02em;color:#0B2B1F}
+  .tabbar{grid-column:1;grid-row:1/span 2;position:sticky;top:0;height:100vh;height:100dvh;align-self:start;overflow:visible;width:auto;transform:none;margin:0;left:auto;right:auto;bottom:auto;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;border:0;border-right:1px solid #E4ECE4;border-radius:0;padding:24px 14px 18px;color:#43584A;background:#FFFFFF}
+  .nsbrand{display:flex;align-items:center;gap:13px;padding:2px 10px 22px}
+  .nslogo{width:44px;height:44px;border-radius:15px;background:linear-gradient(135deg,#10B981,#0B5C3F);color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 10px 20px rgba(16,185,129,.32),inset 0 1px 0 rgba(255,255,255,.35)}
+  .nslogo svg{width:24px;height:24px;display:block}
+  .nstitle{font-family:var(--font-display,"Bricolage Grotesque",sans-serif);font-weight:800;color:#0B2B1F;font-size:19px;line-height:1.05;letter-spacing:-.02em}
+  .nstitle small{display:block;font-family:var(--font-sans,"Plus Jakarta Sans",sans-serif);font-size:8.5px;font-weight:700;color:#93A897;letter-spacing:.18em;text-transform:uppercase;margin-top:4px}
+  .nsnav{display:flex;flex-direction:column;gap:4px}
+  .tabbar button{flex:0 0 auto;flex-direction:row;justify-content:flex-start;align-items:center;gap:13px;font-size:14px;font-weight:600;padding:0 14px;height:46px;color:#43584A;background:transparent;border-radius:13px;width:100%;text-align:left;transition:background .15s ease,color .15s ease,box-shadow .15s ease}
+  .tabbar button .ti{width:auto;height:auto;border-radius:0;background:none;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:none}
+  .tabbar button .ti svg{width:21px;height:21px;color:#6E8873;transition:color .15s ease}
+  .tabbar button.on{background:linear-gradient(135deg,#10B981,#0B7A4E);color:#fff;box-shadow:0 10px 22px rgba(16,185,129,.38)}
+  .tabbar button.on .ti svg{color:#fff}
+  .tabbar button:not(.on):hover{background:#F1F7F2}
+  .tabbar button:not(.on):hover .ti svg{color:#0E9F6E}
+  .nsuser{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;margin-top:auto;padding:16px 10px 2px;border-top:1px solid #E4ECE4}
+  .nsava{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#10B981,#0B5C3F);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;box-shadow:0 6px 14px rgba(16,185,129,.32)}
+  .nsuinfo{min-width:0}
+  .nsuinfo b{display:block;color:#0B2B1F;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nsuinfo small{display:block;color:#93A897;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nsout{border:1px solid #E4ECE4;background:#fff;color:#93A897;width:36px;height:36px;border-radius:11px;cursor:pointer;flex:0 0 auto;display:flex;align-items:center;justify-content:center;transition:all .15s ease}
+  .nsout:hover{background:#FEF2F2;border-color:#FECACA;color:#DC2626}
+  .nsout svg{width:18px;height:18px;display:block}
+  .nslabel{display:none;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#A3B8A8;padding:0 14px 8px}
+  @media(min-width:900px){.nslabel{display:block}}
   .appbody{grid-column:2;grid-row:2;border-radius:0;background:transparent;padding:22px 32px 32px}
   #np-beranda{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
   #np-beranda .saldo-hero{grid-column:1/-1;margin:2px 0 2px}
@@ -1440,15 +1449,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
     </div>
   </div>
   <nav class="tabbar">
-    <div class="nsbrand"><span class="nslogo">♻️</span><span class="nstitle">NBA<small>Bank Sampah Digital</small></span></div>
+    <div class="nsbrand"><span class="nslogo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 18.5C5.5 11 10.5 6 19 5c-.8 8.5-5.5 13.5-13.5 13.5z"/><path d="M5.5 18.5C8.5 13.5 12.5 10 17 8"/></svg></span><span class="nstitle">NBA<small>Bank Sampah Digital</small></span></div>
+    <div class="nslabel">Menu Utama</div>
     <div class="nsnav">
-    <button class="on" data-np="beranda" onclick="showNp('beranda')"><span class="ti">🏠</span><span>Beranda</span></button>
-    <button data-np="setor" onclick="showNp('setor')"><span class="ti">⚖️</span><span>Setor</span></button>
-    <button data-np="riwayat" onclick="showNp('riwayat')"><span class="ti">🧾</span><span>Riwayat</span></button>
-    <button data-np="harga" onclick="showNp('harga')"><span class="ti">💲</span><span>Harga</span></button>
-    <button data-np="akun" onclick="showNp('akun')"><span class="ti">👤</span><span>Akun</span></button>
+    <button class="on" data-np="beranda" onclick="showNp('beranda')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg></span><span>Beranda</span></button>
+    <button data-np="setor" onclick="showNp('setor')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16"/><path d="M8 20h8"/><path d="M5 6.5h14"/><path d="M7.5 6.5 5 12.5h5L7.5 6.5z"/><path d="M16.5 6.5 14 12.5h5l-2.5-6z"/></svg></span><span>Setor</span></button>
+    <button data-np="riwayat" onclick="showNp('riwayat')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.5-2 1.5-2-1.5L10 21l-2-1.5L6 21V3z"/><path d="M9.5 8.5h5"/><path d="M9.5 12h5"/></svg></span><span>Riwayat</span></button>
+    <button data-np="harga" onclick="showNp('harga')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 12.8 21.2a1.5 1.5 0 0 1-2.1 0L3 13.5V3h10.5l7.1 7.1a1.5 1.5 0 0 1 0 2.1z"/><circle cx="7.5" cy="7.5" r="1.3"/></svg></span><span>Harga</span></button>
+    <button data-np="akun" onclick="showNp('akun')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.2-3.8 4-5.5 7.5-5.5s6.3 1.7 7.5 5.5"/></svg></span><span>Akun</span></button>
     </div>
-    <div class="nsuser"><span class="nsava">?</span><span class="nsuinfo"><b class="who">–</b><small data-user-id>–</small></span><button class="nsout" onclick="logout()" title="Keluar" aria-label="Keluar">⏻</button></div>
+    <div class="nsuser"><span class="nsava">?</span><span class="nsuinfo"><b class="who">–</b><small data-user-id>–</small></span><button class="nsout" onclick="logout()" title="Keluar" aria-label="Keluar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3"/><path d="m15 16 4-4-4-4"/><path d="M19 12H9"/></svg></button></div>
   </nav>
 </div>
 </div>
