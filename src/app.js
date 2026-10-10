@@ -23,6 +23,9 @@ function createApp(dbPath) {
   app.use(attachUser(db));
 
   app.get('/api/kesehatan', (req, res) => res.json({ ok: true, app: 'nba-backend', waktu: new Date().toISOString() }));
+  const { router: uploadRouter, dir: uploadsDir } = require('./routes/upload').createUploadRoutes();
+  app.use('/api/upload', uploadRouter);
+  app.use('/api/uploads', express.static(uploadsDir, { maxAge: '7d' }));
   app.use('/api/auth', require('./routes/auth')(db));
   app.use('/api/stasiun', require('./routes/stasiun')(db));
   app.use('/api/harga', require('./routes/harga')(db));
