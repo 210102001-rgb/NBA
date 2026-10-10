@@ -79,6 +79,7 @@ async function loadServerData(){
       DB.users = [ME];
     }
   }catch(e){ /* belum login — landing tetap tampil */ }
+  saveServerCache();
 }
 
 async function bootAPI(){
@@ -86,6 +87,42 @@ async function bootAPI(){
          kas: { tunai: 0 }, notif: [], outbox: [], offline: false };
   loadClientCache();
   await loadServerData();
+}
+/* Cache data server di perangkat (HP/PC) — agar saat internet putus,
+   aplikasi tetap bisa dibuka & dipakai input dengan data terakhir. */
+const SERVER_CACHE_KEY = "nba_server_cache_v1";
+function saveServerCache(){
+  try{
+    const prev = JSON.parse(localStorage.getItem(SERVER_CACHE_KEY) || "null") || {};
+    const loggedIn = !!ME;
+    localStorage.setItem(SERVER_CACHE_KEY, JSON.stringify({
+      ts: Date.now(),
+      ME: loggedIn ? ME : (prev.ME || null),
+      stasiun: DB.stasiun, harga: DB.harga, berita: DB.berita,
+      transaksi: loggedIn ? DB.transaksi : (prev.transaksi || []),
+      users: loggedIn ? DB.users : (prev.users || []),
+      kas: DB.kas, hargaHistory: DB.hargaHistory
+    }));
+  }catch(e){}
+}
+function loadServerCache(){
+  try{
+    const c = JSON.parse(localStorage.getItem(SERVER_CACHE_KEY) || "null");
+    if(!c) return false;
+    ME = c.ME || null;
+    DB.stasiun = c.stasiun || []; DB.harga = c.harga || {}; DB.berita = c.berita || [];
+    DB.transaksi = c.transaksi || []; DB.users = c.users || [];
+    DB.kas = c.kas || { tunai: 0 }; DB.hargaHistory = c.hargaHistory || [];
+    DB._cacheTs = c.ts || 0;
+    return true;
+  }catch(e){ return false; }
+}
+function cacheAgeText(){
+  if(!DB._cacheTs) return "";
+  const mins = Math.round((Date.now() - DB._cacheTs) / 60000);
+  if(mins < 1) return "baru saja";
+  if(mins < 60) return mins + " mnt lalu";
+  return Math.round(mins/60) + " jam lalu";
 }
 async function refreshData(){ await loadServerData(); renderNotifBadge(); }
 
@@ -162,7 +199,7 @@ function renderSteps(){
   ).join("");
   document.getElementById("steps").innerHTML = h;
   const sa = document.getElementById("stepsApp");
-  if(sa) sa.innerHTML = h;
+  if(sa) sa.innerHTML = STEPS.map(s=>`<div class="step"><span class="n">${s[1].split(".")[0]}</span><div class="b"><b>${s[1].slice(3)}</b>${s[2]}</div></div>`).join("");
 }
 function renderPriceTabs(){
   const cats = Object.keys(DB.harga);
@@ -204,6 +241,11 @@ function renderHargaRows(){
 }
 let leafMaps = {};
 function pinColor(s){ return s==="Online" ? "#2E9E4F" : (s==="Offline" ? "#E53935" : "#F9A825"); }
+let pinMarkers = {};
+let stasiunTerpilih = null;
+function pinIcon(s, selected){
+  return L.divIcon({ className: "", html: '<div class="lpin' + (s.status==="Online"?" pulse":"") + (selected?" sel":"") + '" style="background:' + pinColor(s.status) + '">' + s.id.replace("ST-","") + '</div>', iconSize: [38,38], iconAnchor: [19,19] });
+}
 function renderMapPins(){
   const ids = ["leafletMap", "leafletMapAdmin"];
   if(typeof L === "undefined"){
@@ -223,17 +265,117 @@ function renderMapPins(){
     }
     const m = leafMaps[id];
     m.eachLayer(l=>{ if(l instanceof L.Marker) m.removeLayer(l); });
+    if(id==="leafletMapAdmin") pinMarkers = {};
     DB.stasiun.forEach(s=>{
-      if(s.lat === undefined) return;
-      const mk = L.marker([s.lat, s.lng], {
-        icon: L.divIcon({ className: "", html: '<div class="lpin' + (s.status==="Online"?" pulse":"") + '" style="background:' + pinColor(s.status) + '">' + s.id.replace("ST-","") + '</div>', iconSize: [38,38], iconAnchor: [19,19] })
-      }).addTo(m);
+      if(s == null || s.lat == null || s.lng == null) return;
+      const isAdmin = id==="leafletMapAdmin";
+      const mk = L.marker([s.lat, s.lng], { icon: pinIcon(s, isAdmin && stasiunTerpilih===s.id) }).addTo(m);
       mk.bindPopup("<b>" + s.id + " &middot; " + s.nama + "</b><br><span style='font-size:12px;color:#666'>" + (s.lokasi||"") + " &middot; " + s.status + "</span>");
-      mk.on("popupopen", ()=>{ setTimeout(()=>showStasiunDetail(s.id), 350); });
+      if(isAdmin){
+        pinMarkers[s.id] = mk;
+        mk.on("click", ()=>pilihPin(s.id));
+      } else {
+        mk.on("popupopen", ()=>{ setTimeout(()=>showStasiunDetail(s.id), 350); });
+      }
     });
     setTimeout(()=>m.invalidateSize(), 300);
   });
 }
+/* ═══ cari & pilih stasiun di peta admin ═══ */
+function matchStasiun(q){
+  q = (q||"").trim().toLowerCase();
+  if(!q) return [];
+  return DB.stasiun.filter(s=>((s.nama||"")+" "+(s.id||"")+" "+(s.lokasi||"")).toLowerCase().includes(q)).slice(0,6);
+}
+function stasiunHasilHTML(hasil, fnName){
+  return hasil.map(s=>`<button onclick="${fnName}('${s.id}')"><b>${s.id}</b><span>${s.nama}</span><span class="pill ${stDot(s.status)}">${s.status}</span></button>`).join("");
+}
+function cariStasiun(){
+  const q = (document.getElementById("petaCari").value||"").trim();
+  const box = document.getElementById("petaHasil");
+  if(!q){ box.style.display="none"; box.innerHTML=""; return; }
+  const hasil = matchStasiun(q);
+  if(!hasil.length){ box.innerHTML = '<div class="mr-empty">Stasiun tidak ditemukan.</div>'; box.style.display="block"; return; }
+  box.innerHTML = stasiunHasilHTML(hasil, "pilihStasiunPeta");
+  box.style.display = "block";
+}
+function cariStasiunDash(){
+  const q = (document.getElementById("dashCari").value||"").trim();
+  const box = document.getElementById("dashHasil");
+  if(!q){ box.style.display="none"; box.innerHTML=""; return; }
+  const hasil = matchStasiun(q);
+  if(!hasil.length){ box.innerHTML = '<div class="mr-empty">Stasiun tidak ditemukan.</div>'; box.style.display="block"; return; }
+  box.innerHTML = stasiunHasilHTML(hasil, "lompatKeStasiun");
+  box.style.display = "block";
+}
+function goAdminTab(k){
+  const b = document.querySelector(`.slink[data-ap="${k}"]`);
+  if(b) b.click();
+}
+function lompatKeStasiun(id){
+  const box = document.getElementById("dashHasil");
+  box.style.display="none"; box.innerHTML="";
+  document.getElementById("dashCari").value = "";
+  goAdminTab("peta");
+  const s = DB.stasiun.find(x=>x.id===id);
+  if(s && s.lat!=null && s.lng!=null){
+    const m = leafMaps["leafletMapAdmin"];
+    if(m){
+      m.invalidateSize();
+      setTimeout(()=>{
+        try{ m.flyTo([s.lat, s.lng], 15, { duration: 1.1 }); }catch(e){ m.setView([s.lat, s.lng], 15); }
+        setTimeout(()=>pilihPin(id), 1200);
+      }, 150);
+    } else {
+      pilihPin(id);
+    }
+  }
+}
+function pilihStasiunPeta(id){
+  const box = document.getElementById("petaHasil");
+  box.style.display="none"; box.innerHTML="";
+  document.getElementById("petaCari").value = "";
+  const s = DB.stasiun.find(x=>x.id===id);
+  if(!s || s.lat==null || s.lng==null) return;
+  const m = leafMaps["leafletMapAdmin"];
+  if(m) m.flyTo([s.lat, s.lng], 15, { duration: 1.1 });
+  setTimeout(()=>pilihPin(id), 1150);
+}
+function pilihPin(id){
+  stasiunTerpilih = id;
+  const s = DB.stasiun.find(x=>x.id===id);
+  if(!s) return;
+  Object.entries(pinMarkers).forEach(([mid, mk])=>{
+    const ms = DB.stasiun.find(x=>x.id===mid);
+    if(ms) mk.setIcon(pinIcon(ms, mid===id));
+  });
+  const card = document.getElementById("stasiunCard");
+  const trx = DB.transaksi.filter(t=>t.stasiun===id).slice(0,3);
+  card.innerHTML = `<h3>${s.nama}</h3><p class="msub">${s.id} &middot; dipilih dari peta</p>
+    <div class="kv"><span>Status</span><span class="pill ${stDot(s.status)}">${s.status}</span></div>
+    <div class="kv"><span>Lokasi</span><b>${s.lokasi||"-"}</b></div>
+    <div class="kv"><span>Alamat</span><b>${s.alamat||"-"}</b></div>
+    <div class="kv"><span>Jam operasional</span><b>${s.jam||"-"}</b></div>
+    <div class="kv"><span>Transaksi hari ini</span><b>${s.trxHari||0}</b></div>
+    ${trx.length?'<div class="kv"><span>Terakhir</span><b>'+trx.map(t=>t.tgl.split(" ·")[0]).join(", ")+'</b></div>':""}
+    <div class="btnrow"><button class="btn btn-p" style="flex:1" onclick="showStasiunDetail('${s.id}')">Lihat Detail</button><button class="btn btn-o" onclick="tutupStasiunCard()">Tutup</button></div>`;
+  card.style.display = "block";
+}
+function tutupStasiunCard(){
+  stasiunTerpilih = null;
+  document.getElementById("stasiunCard").style.display = "none";
+  document.getElementById("stasiunCard").innerHTML = "";
+  Object.entries(pinMarkers).forEach(([mid, mk])=>{
+    const ms = DB.stasiun.find(x=>x.id===mid);
+    if(ms) mk.setIcon(pinIcon(ms, false));
+  });
+}
+document.addEventListener("click", e=>{
+  ["petaHasil","dashHasil"].forEach(bid=>{
+    const box = document.getElementById(bid);
+    if(box && box.style.display==="block" && !e.target.closest(".mapsearch")){ box.style.display="none"; }
+  });
+});
 function refreshAdminMap(){ const m = leafMaps["leafletMapAdmin"]; if(m) setTimeout(()=>m.invalidateSize(), 350); }
 function renderBerita(){
   const el = document.querySelector("#berita .news");
@@ -262,10 +404,67 @@ function openBerita(i){
 }
 
 
+/* ═══ grafik dashboard nasabah (SVG murni) ═══ */
+const BULAN_ID = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+const KAT_WARNA = { Plastik:"#2E9E4F", Kertas:"#F9A825", Logam:"#78909C", Kaca:"#29B6F6", Organik:"#8D6E63" };
+function warnaKat(k){ return KAT_WARNA[k] || "#7CB342"; }
+function parseTglSingkat(tgl){
+  const m = String(tgl||"").match(/(\d+)\s+([A-Za-z]+)\s+(\d{4})/);
+  if(!m) return null;
+  const mi = BULAN_ID.findIndex(b=>b.toLowerCase()===m[2].slice(0,3).toLowerCase());
+  if(mi<0) return null;
+  return { d:+m[1], m:mi, y:+m[3] };
+}
+function renderGrafik(){
+  const u = currentUser(); if(!u) return;
+  const el = document.getElementById("grafikWrap"); if(!el) return;
+  const trx = DB.transaksi.filter(t=>t.userId===u.id && t.tipe==="setor");
+  /* --- bar: berat per bulan, 6 bulan terakhir --- */
+  const now = new Date(), months = [];
+  for(let i=5;i>=0;i--){ const d = new Date(now.getFullYear(), now.getMonth()-i, 1); months.push({y:d.getFullYear(), m:d.getMonth(), kg:0}); }
+  trx.forEach(t=>{ const p = parseTglSingkat(t.tgl); if(!p) return;
+    const mx = months.find(x=>x.y===p.y && x.m===p.m); if(mx) mx.kg += (+t.berat||0); });
+  const maxKg = Math.max.apply(null, months.map(m=>m.kg).concat([1]));
+  const W=320, H=176, padB=26, padT=16, bw=W/months.length;
+  const baseY = H-padB;
+  let bars = `<line x1="0" y1="${baseY}" x2="${W}" y2="${baseY}" stroke="#CBD8CC" stroke-width="1.5"/>`;
+  bars += `<line x1="0" y1="${(padT+baseY)/2}" x2="${W}" y2="${(padT+baseY)/2}" stroke="#EDF2EA" stroke-width="1" stroke-dasharray="4 4"/>`;
+  months.forEach((m,i)=>{
+    const h = Math.max(3,(m.kg/maxKg)*(H-padB-padT));
+    const x = i*bw+bw*0.22, w = bw*0.56, y = H-padB-h, cx = x+w/2, cur = i===months.length-1;
+    bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="5" fill="${cur?"url(#ggrad)":"#CDE6D2"}"/>`;
+    if(m.kg>0) bars += `<text x="${cx.toFixed(1)}" y="${(y-5).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="700" fill="#16442B">${m.kg.toFixed(1)}</text>`;
+    bars += `<text x="${cx.toFixed(1)}" y="${H-9}" text-anchor="middle" font-size="10" fill="#6B7A6E">${BULAN_ID[m.m]}</text>`;
+  });
+  const barSvg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="Grafik berat setoran per bulan"><defs><linearGradient id="ggrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#35A85C"/><stop offset="1" stop-color="#1E6B38"/></linearGradient></defs>${bars}</svg>`;
+  /* --- donut: komposisi kategori --- */
+  const kat = {};
+  trx.forEach(t=>{ const k=t.kategori||"Lainnya"; kat[k]=(kat[k]||0)+(+t.berat||0); });
+  const total = Object.values(kat).reduce((a,b)=>a+b,0);
+  let donutHtml;
+  if(total<=0){
+    donutHtml = `<div class="gempty">Belum ada data setoran.</div>`;
+  } else {
+    const R=54, C=2*Math.PI*R;
+    let off=0, segs="";
+    Object.entries(kat).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{
+      const f=v/total;
+      segs += `<circle cx="70" cy="70" r="${R}" fill="none" stroke="${warnaKat(k)}" stroke-width="20" stroke-dasharray="${(f*C).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-off*C).toFixed(1)}" transform="rotate(-90 70 70)"/>`;
+      off += f;
+    });
+    const legend = Object.entries(kat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>
+      `<div><span class="gdot" style="background:${warnaKat(k)}"></span><span>${k}</span><b>${v.toFixed(1)} Kg</b></div>`).join("");
+    donutHtml = `<div class="gdonut"><svg viewBox="0 0 140 140" style="width:128px;height:128px;flex:0 0 auto" role="img" aria-label="Komposisi kategori sampah">${segs}<text x="70" y="67" text-anchor="middle" font-size="17" font-weight="800" fill="#0E3320">${total.toFixed(1)}</text><text x="70" y="85" text-anchor="middle" font-size="10.5" fill="#6B7A6E">Kg</text></svg><div class="glegend">${legend}</div></div>`;
+  }
+  el.innerHTML = `<div class="gcol"><h4>Berat per bulan (Kg)</h4>${barSvg}</div><div class="gcol"><h4>Komposisi kategori</h4>${donutHtml}</div>`;
+}
+
+
 function renderNasabah(){
   const u = currentUser();
   if(!u) return;
   document.querySelectorAll(".who").forEach(e=>e.textContent = u.nama);
+  document.querySelectorAll(".nsava").forEach(e=>e.textContent = (u.nama||"?").trim().charAt(0).toUpperCase());
   const snum = document.querySelector(".snum");
   if(snum) snum.textContent = rp(u.saldo);
   const q = (document.getElementById("riwayatCari")||{}).value || "";
@@ -280,6 +479,7 @@ function renderNasabah(){
   document.querySelectorAll("[data-user-tel]").forEach(e=>e.textContent = u.tel.replace(/(\d{4})(\d+)(\d{4})/,"$1\u2022\u2022\u2022\u2022$3"));
   document.querySelectorAll("[data-user-sejak]").forEach(e=>e.textContent = u.sejak);
   document.querySelectorAll(".snum2").forEach(e=>e.textContent = rp(u.saldo));
+  try{ renderGrafik(); }catch(e){ console.warn("grafik:", e); }
   const av = document.querySelector(".avatar");
   if(av) av.textContent = u.nama.charAt(0).toUpperCase();
   const ph = document.querySelector(".profile-head b");
@@ -312,9 +512,15 @@ async function init(){
   l.style.display = "flex"; requestAnimationFrame(()=>l.classList.add("show"));
   try{ await bootAPI(); }
   catch(e){
-    l.classList.remove("show"); setTimeout(()=>{ l.style.display = "none"; }, 280);
-    openModal(`<div style="text-align:center;padding:24px"><div style="font-size:52px">🚫</div><h2>Gagal memuat data</h2><p class="msub">Server tidak merespons (${e.message}). Periksa koneksi lalu muat ulang halaman.</p><div class="btnrow"><button class="btn btn-p" style="flex:1" onclick="location.reload()">Muat Ulang</button></div></div>`);
-    return;
+    /* Server tidak terjangkau — coba pakai data terakhir dari perangkat agar tetap bisa input offline */
+    if(loadServerCache()){
+      DB.offline = true; saveDB();
+      addNotif("admin", "Mode offline", "Server tidak terjangkau — memakai data " + (cacheAgeText() ? "per " + cacheAgeText() : "terakhir") + " dari perangkat ini. Input baru tersimpan lokal & otomatis tersinkron saat online.");
+    } else {
+      l.classList.remove("show"); setTimeout(()=>{ l.style.display = "none"; }, 280);
+      openModal(`<div style="text-align:center;padding:24px"><div style="font-size:52px">🚫</div><h2>Gagal memuat data</h2><p class="msub">Server tidak merespons (${e.message}). Periksa koneksi lalu muat ulang halaman.</p><div class="btnrow"><button class="btn btn-p" style="flex:1" onclick="location.reload()">Muat Ulang</button></div></div>`);
+      return;
+    }
   }
   l.classList.remove("show"); setTimeout(()=>{ l.style.display = "none"; }, 280);
   renderAll(); renderBeritaRows(); fillStasiunFilter();
@@ -463,11 +669,11 @@ function renderSimStep(){
   const dots = [1,2,3,4].map(i=>`<span class="${sim.step>=i?"on":""}"></span>`).join("");
   let body = "";
   if(sim.step === 1){
-    body = `<div class="scale-display"><div class="wval" id="wVal">0,00</div><small>KILOGRAM</small></div>
+    body = `<div style="text-align:center"><span class="simcomp">S-Cell · Sensor Timbang</span></div><div class="scale-display"><div class="wval" id="wVal">0,00</div><small>KILOGRAM</small></div>
       <p class="fine" style="text-align:center">Letakkan sampah di atas timbangan, lalu kunci berat.</p>
       <div class="btnrow"><button class="btn btn-p" id="wBtn" onclick="simWeigh()">\u2696\uFE0F Mulai Timbang</button></div>`;
   } else if(sim.step === 2){
-    body = `<div class="scanline"></div>
+    body = `<div style="text-align:center"><span class="simcomp">S-Eye · Kamera AI</span></div><div class="scanline"></div>
       <p class="fine" style="text-align:center" id="aiTxt">AI sedang memindai sampah&hellip;</p>
       <div id="aiResult" style="display:none">
         <div class="formrow"><label>Hasil deteksi AI <span style="font-weight:400">(bisa dikoreksi manual)</span></label>
@@ -477,7 +683,7 @@ function renderSimStep(){
       <div class="btnrow"><button class="btn btn-o" onclick="sim.step=1;renderSimStep()">\u2190 Ulangi</button>
       <button class="btn btn-p" id="aiNext" onclick="simNext()" disabled>Lanjut \u2192</button></div>`;
   } else if(sim.step === 3){
-    body = `<div class="nfc-card" id="nfcTap" onclick="simTap()">
+    body = `<div style="text-align:center"><span class="simcomp">S-Tap · Pembaca NFC</span></div><div class="nfc-card" id="nfcTap" onclick="simTap()">
         <div class="nfc-ring"></div><div class="chip"></div>
         <small>Kartu NFC &middot; ${u.nama}</small><br><b>${u.nfc}</b>
         <p style="margin:12px 0 0;font-size:13px;color:#BFE3C6" id="tapTxt">Ketuk kartu untuk menempel \u{0001F446}</p>
@@ -485,7 +691,11 @@ function renderSimStep(){
       <div class="btnrow"><button class="btn btn-o" onclick="sim.step=2;renderSimStep()">\u2190 Kembali</button></div>`;
   } else {
     const total = Math.round(sim.berat * sim.harga);
-    body = `<div class="panel" style="margin-bottom:14px">
+    const boxCat = sim.cat || cats[0] || "";
+    const boxNo = cats.indexOf(boxCat) + 1;
+    body = `<div style="text-align:center"><span class="simcomp">S-Box · Kotak Penampung</span></div>
+      <div style="text-align:center;margin-bottom:14px"><span class="sbox-tag">\u{0001F4E6} Masukkan ke S-Box ${boxNo} · ${boxCat}</span></div>
+      <div class="panel" style="margin-bottom:14px">
         <div class="kv"><span>Berat</span><b>${String(sim.berat.toFixed(2)).replace(".",",")} ${sim.satuan}</b></div>
         <div class="kv"><span>Jenis</span><b>${sim.item}</b></div>
         <div class="kv"><span>Harga</span><b>${rp(sim.harga)}/${sim.satuan}</b></div>
@@ -672,6 +882,10 @@ async function doLogin(){
 async function logout(){
   try{ await apiPost("/auth/logout"); }catch(e){}
   ME = null; go("landing");
+  try{
+    const c = JSON.parse(localStorage.getItem(SERVER_CACHE_KEY) || "null");
+    if(c){ c.ME = null; c.users = []; c.transaksi = []; localStorage.setItem(SERVER_CACHE_KEY, JSON.stringify(c)); }
+  }catch(e){}
 }
 function renderUserRows(){
   const el = document.getElementById("userRows");
@@ -873,7 +1087,7 @@ function editHarga(cat, nama){
     <h2>Ubah Harga</h2><p class="msub">${nama} <small>(${cat})</small></p>
     <div class="formrow"><label>Harga saat ini</label><input value="${rp(r[1])}/${r[2]}" disabled></div>
     <div class="formrow"><label>Harga baru (Rp)</label><input id="ehHarga" type="number" min="0" value="${r[1]}"></div>
-    <div class="formrow"><label>Alasan perubahan <span style="font-weight:400">(dicatat di riwayat)</span></label><input id="ehAlasan" placeholder="cth: Mengikuti harga pengepul"></div>
+    <div class="formrow"><label>Alasan perubahan <span style="font-weight:400">(dicatat di riwayat)</span></label><input id="ehAlasan" placeholder="cth: Mengikuti harga pengelola bank sampah"></div>
     <div class="btnrow"><button class="btn btn-o" onclick="closeModal()">Batal</button>
     <button class="btn btn-p" onclick="saveEditHarga('${cat.replace(/'/g,"\\'")}','${nama.replace(/'/g,"\\'")}')">Simpan</button></div>`);
 }
@@ -956,13 +1170,23 @@ async function delBerita(i){
   catch(e){ alert("Gagal menghapus: " + e.message); return; }
   renderAll();
 }
-function setOffline(v){
+function setOffline(v, auto){
   DB.offline = v; saveDB(); renderKas();
-  addNotif("admin", v ? "Mode offline AKTIF" : "Kembali online", v ? "Transaksi baru masuk antrean lokal." : "Jaringan pulih.");
+  addNotif("admin", v ? "Mode offline AKTIF" : "Kembali online", v ? (auto ? "Internet terputus — transaksi baru masuk antrean lokal di perangkat ini." : "Transaksi baru masuk antrean lokal.") : "Jaringan pulih.");
   const t = document.getElementById("offlineToggle");
   if(t) t.checked = v;
   if(!v && DB.outbox.length) syncOutbox();
 }
+/* Deteksi internet beneran: otomatis masuk mode offline saat koneksi putus,
+   data tetap bisa diinput dan tersimpan di perangkat (localStorage),
+   lalu otomatis tersinkron saat online lagi. */
+window.addEventListener("offline", ()=>setOffline(true, true));
+window.addEventListener("online", ()=>setOffline(false, true));
+document.addEventListener("DOMContentLoaded", ()=>{
+  if(typeof navigator !== "undefined" && navigator.onLine === false){
+    setTimeout(()=>{ if(DB) setOffline(true, true); }, 800);
+  }
+});
 async function syncOutbox(){
   if(!DB.outbox.length){ alert("Tidak ada antrean offline."); return; }
   const n = DB.outbox.length;
@@ -970,7 +1194,7 @@ async function syncOutbox(){
   for(const t of DB.outbox){
     try{
       if(t.tipe === "setor"){
-        await apiPost("/transaksi", { stasiun_id: t.stasiun, kategori: t.kategori, item: t.item, berat: t.berat });
+        await apiPost("/transaksi", { user_id: t.userId || undefined, stasiun_id: t.stasiun, kategori: t.kategori, item: t.item, berat: t.berat });
       } else {
         await apiPost("/transaksi", { tipe: "tarik", jumlah: t.total, metode: t.metode });
       }
@@ -981,9 +1205,63 @@ async function syncOutbox(){
   addNotif("admin","Sync selesai",`${n - gagal.length} dari ${n} transaksi tersinkron.${gagal.length ? " " + gagal.length + " gagal, tetap di antrean." : ""}`);
   saveDB(); renderAll();
 }
+/* ═══ input transaksi manual oleh admin ═══ */
+function inputManual(){
+  const users = DB.users.filter(u=>u.aktif && u.role !== "admin");
+  if(!users.length){ alert("Belum ada data nasabah."); return; }
+  const cats = Object.keys(DB.harga);
+  openModal(`<button class="mclose" onclick="closeModal()">\u00D7</button>
+    <h2>Input Setoran Manual</h2><p class="msub">Catat setoran langsung tanpa lewat simulasi timbangan.${DB.offline ? " <b>Offline:</b> tersimpan di perangkat, sync otomatis saat online." : ""}</p>
+    <div class="formrow"><label>Nasabah</label><select id="imUser">${users.map(u=>`<option value="${u.id}">${u.nama} · ${u.id}</option>`).join("")}</select></div>
+    <div class="formrow"><label>Stasiun</label><select id="imStasiun">${DB.stasiun.map(s=>`<option value="${s.id}">${s.id} · ${s.nama}</option>`).join("")}</select></div>
+    <div class="formrow"><label>Kategori</label><select id="imCat" onchange="imFillItems()">${cats.map(c=>`<option>${c}</option>`).join("")}</select></div>
+    <div class="formrow"><label>Jenis sampah</label><select id="imItem" onchange="imHitung()"></select></div>
+    <div class="formrow"><label>Berat (Kg)</label><input id="imBerat" type="number" min="0.1" step="0.1" placeholder="cth: 2,5" oninput="imHitung()"></div>
+    <div class="kv" style="margin-top:6px"><span>Total nilai</span><b id="imTotal" style="font-size:18px;color:var(--nba-d)">Rp 0</b></div>
+    <div class="btnrow"><button class="btn btn-o" onclick="closeModal()">Batal</button>
+    <button class="btn btn-p" style="flex:1" onclick="simpanManual()">\u2713 Simpan Setoran</button></div>`);
+  imFillItems();
+}
+function imFillItems(){
+  const c = document.getElementById("imCat").value;
+  const items = DB.harga[c] || [];
+  document.getElementById("imItem").innerHTML = items.map(r=>`<option value="${r[0]}|${r[1]}">${r[0]} — ${rp(r[1])}/Kg</option>`).join("");
+  imHitung();
+}
+function imHitung(){
+  const berat = parseFloat(String(document.getElementById("imBerat").value).replace(",", ".")) || 0;
+  const harga = +(document.getElementById("imItem").value.split("|")[1] || 0);
+  document.getElementById("imTotal").textContent = rp(Math.round(berat * harga));
+}
+async function simpanManual(){
+  const userId = document.getElementById("imUser").value;
+  const stasiun = document.getElementById("imStasiun").value;
+  const kategori = document.getElementById("imCat").value;
+  const [item, hargaStr] = document.getElementById("imItem").value.split("|");
+  const berat = parseFloat(String(document.getElementById("imBerat").value).replace(",", ".")) || 0;
+  const u = DB.users.find(x=>x.id===userId);
+  if(!u){ alert("Pilih nasabah."); return; }
+  if(!(berat > 0)){ alert("Isi berat yang valid."); return; }
+  const harga = +hargaStr || 0, total = Math.round(berat * harga);
+  if(DB.offline){
+    DB.outbox.push({ id: newTrxId(), tgl: fmtTgl(), userId: u.id, nama: u.nama, stasiun,
+      kategori, item, berat, harga, satuan: "Kg", total, tipe: "setor", status: "Menunggu" });
+    addNotif("admin", "Setoran manual tersimpan offline", `${u.nama} · ${item} ${berat} Kg (${rp(total)}) — menunggu sync.`);
+    addNotif(u.id, "Setoran dicatat", `${item} ${berat} Kg — ${rp(total)}. Menunggu sync.`);
+    saveDB(); renderAll(); closeModal();
+    alert("Tersimpan di antrean offline. Akan tersinkron otomatis saat online.");
+    return;
+  }
+  try{
+    await apiPost("/transaksi", { user_id: userId, stasiun_id: stasiun, kategori, item, berat });
+    await refreshData(); renderAll(); closeModal();
+    addNotif("admin", "Setoran manual", `${u.nama} · ${item} ${berat} Kg (${rp(total)}).`);
+    alert("Setoran tersimpan: " + u.nama + " — " + rp(total));
+  }catch(e){ alert("Gagal menyimpan: " + e.message); }
+}
 function kasTerima(){
   openModal(`<button class="mclose" onclick="closeModal()">\u00D7</button>
-    <h2>Terima dari Pengepul</h2><p class="msub">Catat uang masuk hasil jual sampah ke pengepul.</p>
+    <h2>Terima dari Pengelola</h2><p class="msub">Catat uang masuk hasil jual sampah ke pengelola bank sampah.</p>
     <div class="formrow"><label>Nominal (Rp)</label><input id="kasNominal" type="number" min="0" placeholder="cth: 1500000"></div>
     <div class="formrow"><label>Keterangan</label><input id="kasKet" placeholder="cth: Jual plastik ke UD Maju"></div>
     <div class="btnrow"><button class="btn btn-o" onclick="closeModal()">Batal</button>
@@ -992,7 +1270,7 @@ function kasTerima(){
 async function kasTerimaExec(){
   const n = Math.round(+document.getElementById("kasNominal").value || 0);
   if(n <= 0){ alert("Nominal tidak valid."); return; }
-  const ket = document.getElementById("kasKet").value.trim() || "Pengepul";
+  const ket = document.getElementById("kasKet").value.trim() || "Pengelola";
   try{
     await apiPost("/kas/tambah", { jumlah: n, keterangan: ket });
     await refreshData();
