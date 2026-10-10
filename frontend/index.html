@@ -465,17 +465,19 @@ table.data{font-variant-numeric:tabular-nums}
   .main{min-width:0;overflow-x:hidden}
   .kascard b{white-space:nowrap;font-size:17px}
   .stat b{font-size:21px}
-  .side{flex-direction:row;overflow-x:auto;padding:10px;gap:8px;align-items:center;scrollbar-width:none}
+  .side{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));top:auto;z-index:40;flex-direction:row;overflow-x:auto;padding:8px;gap:6px;align-items:center;scrollbar-width:none;background:linear-gradient(172deg,#062A20 0%,#0A3B2C 70%);border-radius:22px;box-shadow:0 12px 32px rgba(6,42,32,.38)}
   .side::-webkit-scrollbar{display:none}
   .side .sbrand{display:none}
-  .slink{width:auto;flex:0 0 auto;white-space:nowrap;padding:10px 14px;font-size:13px}
+  .side>span[style]{display:none}
+  .slink{width:auto;flex:0 0 auto;white-space:nowrap;padding:10px 12px;font-size:12px;border-radius:14px}
+  .slink .e{font-size:16px}
   .stat4{grid-template-columns:repeat(2,1fr)}
   .two{grid-template-columns:1fr}
   .nav-links{display:none}
   footer .cols{grid-template-columns:1fr}
   .panel{overflow-x:auto}
   .main table.data{min-width:560px}
-  .main{padding:18px 14px}
+  .main{padding:18px 14px 96px}
 }
 
 
