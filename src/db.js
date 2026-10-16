@@ -55,6 +55,7 @@ const MIGRATIONS = [
    );`,
   `ALTER TABLE transaksi ADD COLUMN metode TEXT;`,
   `ALTER TABLE berita ADD COLUMN gambar TEXT;`,
+  `ALTER TABLE users ADD COLUMN unit TEXT;`,
 ];
 
 function migrate(db) {

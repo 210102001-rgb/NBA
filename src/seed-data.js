@@ -4,28 +4,16 @@
 
 const STASIUN = [
   { id: 'ST-01', nama: 'Bank Sampah Gukub Rukun', lokasi: 'Kadipiro',     status: 'Online',      alamat: 'Jl. Kadipiro Raya No. 12',  jam: '07.00–16.00', lat: -7.5580, lng: 110.8005, trxHari: 38 },
-  { id: 'ST-02', nama: 'BSU Mojosongo',           lokasi: 'Mojosongo',    status: 'Online',      alamat: 'Jl. Mojosongo No. 45',      jam: '07.00–16.00', lat: -7.5515, lng: 110.8455, trxHari: 24 },
-  { id: 'ST-03', nama: 'BSU Jebres',              lokasi: 'Jebres',       status: 'Online',      alamat: 'Jl. Ki Hajar Dewantara No. 8', jam: '08.00–15.00', lat: -7.5595, lng: 110.8610, trxHari: 31 },
-  { id: 'ST-04', nama: 'BSU Laweyan',             lokasi: 'Laweyan',      status: 'Online',      alamat: 'Jl. Dr. Rajiman No. 21',    jam: '07.00–16.00', lat: -7.5710, lng: 110.7890, trxHari: 19 },
-  { id: 'ST-05', nama: 'BSU Serengan',            lokasi: 'Serengan',     status: 'Offline',     alamat: 'Jl. Veteran No. 88',        jam: '08.00–15.00', lat: -7.5835, lng: 110.8245, trxHari: 0 },
-  { id: 'ST-06', nama: 'BSU Pasar Kliwon',        lokasi: 'Pasar Kliwon', status: 'Maintenance', alamat: 'Jl. Kapten Mulyadi No. 3',  jam: '07.00–16.00', lat: -7.5765, lng: 110.8310, trxHari: 0 },
-  { id: 'ST-07', nama: 'BSU Nusukan',             lokasi: 'Nusukan',      status: 'Online',      alamat: 'Jl. Letjen Sutoyo No. 64',  jam: '07.00–16.00', lat: -7.5525, lng: 110.8125, trxHari: 15 },
-  { id: 'ST-08', nama: 'BSU Pajang',              lokasi: 'Pajang',       status: 'Online',      alamat: 'Jl. Pajang No. 27',         jam: '07.00–16.00', lat: -7.5780, lng: 110.7950, trxHari: 11 },
-  { id: 'ST-09', nama: 'BSU Danukusuman',         lokasi: 'Danukusuman',  status: 'Online',      alamat: 'Jl. Honggowongso No. 52',   jam: '08.00–15.00', lat: -7.5880, lng: 110.8200, trxHari: 9 },
-  { id: 'ST-10', nama: 'BSU Semanggi',            lokasi: 'Semanggi',     status: 'Online',      alamat: 'Jl. Semanggi No. 19',       jam: '07.00–16.00', lat: -7.5720, lng: 110.8450, trxHari: 13 },
-  { id: 'ST-11', nama: 'BSU Tegalharjo',          lokasi: 'Tegalharjo',   status: 'Maintenance', alamat: 'Jl. Tegalharjo No. 33',      jam: '08.00–15.00', lat: -7.5660, lng: 110.8500, trxHari: 0 },
-  { id: 'ST-12', nama: 'BSU Sumber',              lokasi: 'Sumber',       status: 'Offline',     alamat: 'Jl. Sumber No. 41',         jam: '07.00–16.00', lat: -7.5480, lng: 110.8050, trxHari: 0 },
+  { id: 'ST-03', nama: 'BSU Pucang Cuan',         lokasi: 'Jebres',       status: 'Online',      alamat: 'Pucang Sawit RW 13, Jebres', jam: '08.00–15.00', lat: -7.5595, lng: 110.8610, trxHari: 31 },
+  { id: 'ST-04', nama: 'BSU Anggrek',             lokasi: 'Purwosari',    status: 'Online',      alamat: 'Jl. Anggrek RT 01/RW 08, Purwosari', jam: '07.00–16.00', lat: -7.5710, lng: 110.7890, trxHari: 19 },
+  { id: 'ST-07', nama: 'BSU Garuda Sakti',        lokasi: 'Banjarsari',   status: 'Online',      alamat: 'Jl. Garuda Sakti No. 01 RT 05/RW 11, Banjarsari', jam: '07.00–16.00', lat: -7.5525, lng: 110.8125, trxHari: 15 },
 ];
 
 const HARGA = {
   Plastik: [
-    ['Bodongan Kotor', 2500, 'Kg'], ['Bodongan Bersih Mix', 3000, 'Kg'], ['Bodongan Bersih BM', 3250, 'Kg'],
-    ['Bodongan Bersih BN', 3500, 'Kg'], ['Bodongan KW', 1000, 'Kg'], ['Galon PVC 19L', 2750, 'buah'],
-    ['Galon PET 15L', 1000, 'buah'], ['PET Kecil', 3000, 'Kg'], ['Gelasan Bening Kotor', 2000, 'Kg'],
-    ['Gelasan Bening Bersih', 2750, 'Kg'], ['Gelasan Sablon', 1200, 'Kg'], ['Gelasan Ale/Warna PK', 1000, 'Kg'],
-    ['Tutup Air Mineral', 2500, 'Kg'], ['Tutup Galon Isi Ulang', 3000, 'Kg'], ['Tutup Galon Aqua/VIT', 3500, 'Kg'],
-    ['Plastik Daun Bening', 1400, 'Kg'], ['Plastik Daun Warna', 1200, 'Kg'], ['Plastik Daun Hitam', 800, 'Kg'],
-    ['Emberan', 1350, 'Kg'], ['Karung Tidak Robek', 1300, 'Kg'], ['Karung Robek', 800, 'Kg'],
+    ['Bodong Bersih', 3000, 'Kg'], ['Bodong Kotor', 2500, 'Kg'], ['Bodong Mix', 2750, 'Kg'],
+    ['Gelas Bersih', 2750, 'Kg'], ['Gelas Kotor', 2000, 'Kg'],
+    ['Tutup Galon', 3250, 'Kg'], ['Tutup Botol', 2500, 'Kg'],
   ],
   Kertas: [
     ['Kardus', 1500, 'Kg'], ['HVS', 1200, 'Kg'], ['Koran', 3000, 'Kg'],

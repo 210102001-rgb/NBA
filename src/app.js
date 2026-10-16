@@ -4,6 +4,7 @@ const express = require('express');
 const session = require('express-session');
 const { openDb } = require('./db');
 const { attachUser } = require('./auth');
+const { SqliteSessionStore } = require('./session-store');
 
 function createApp(dbPath) {
   const db = openDb(dbPath);
@@ -11,10 +12,12 @@ function createApp(dbPath) {
   app.disable('x-powered-by');
   app.use(express.json({ limit: '1mb' }));
 
-  /* CATATAN PRODUKSI: MemoryStore bawaan TIDAK cocok untuk multi-proses/prod.
-     Ganti dengan session store persisten (mis. connect-sqlite3) sebelum go-live. */
+  /* Session store persisten (tabel `sessions` di SQLite): login bertahan
+     melewati restart container. MemoryStore bawaan TIDAK cocok untuk prod. */
+  const sessionStore = new SqliteSessionStore(db);
   app.use(session({
     name: 'nba.sid',
+    store: sessionStore,
     secret: process.env.SESSION_SECRET || 'ganti-di-produksi',
     resave: false,
     saveUninitialized: false,

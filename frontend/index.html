@@ -28,7 +28,7 @@
   --sans:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
 }
 *{box-sizing:border-box}
-html,body{margin:0;padding:0;overscroll-behavior-y:none}
+html,body{margin:0;padding:0}
 body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:14.5px;line-height:1.55}
 .serif{font-family:var(--serif)}
 a{color:inherit;text-decoration:none}
@@ -143,11 +143,6 @@ footer li{margin-bottom:7px}
 .slink:hover{background:rgba(255,255,255,.08)}
 .slink.on{background:#fff;color:var(--nba-d)}
 .slink .e{font-size:17px}
-.sbrand span{line-height:1.2}
-.sbrand small{display:block;font-size:9.5px;font-weight:700;color:#8fae94;letter-spacing:.1em;margin-top:2px}
-.slabel{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8fae94;padding:16px 12px 6px}
-.sfoot{border-top:1px solid rgba(255,255,255,.12);padding-top:10px;margin-top:10px}
-@media(min-width:901px){.side{position:sticky;top:0;height:100vh;align-self:start;overflow-y:auto;scrollbar-width:thin}}
 .main{padding:26px;max-width:1080px}
 .main h1{margin:0 0 4px;font-size:23px}
 .main .sub{color:var(--mut);font-size:13.5px;margin:0 0 20px}
@@ -198,7 +193,6 @@ table.data tr:last-child td{border-bottom:0}
 .tabbar{position:fixed;left:50%;transform:translateX(-50%);width:min(412px,calc(100vw - 28px));bottom:calc(14px + env(safe-area-inset-bottom));background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:26px;display:flex;box-shadow:0 12px 32px rgba(8,122,86,.16);padding:8px;z-index:40}
 .tabbar button{flex:1;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:#9AA5A0;padding:9px 2px;border-radius:18px;cursor:pointer}
 .tabbar button .ti{font-size:21px}
-.tabbar button .ti svg{width:23px;height:23px;display:block}
 .tabbar button.on{color:var(--nba-d);background:#E7F3EA}
 .nsbrand,.nsuser{display:none}
 .nsnav{display:contents}
@@ -272,8 +266,10 @@ table.data tr:last-child td{border-bottom:0}
 .formrow label{display:block;font-size:12.5px;font-weight:700;color:var(--mut);margin-bottom:6px}
 .formrow input,.formrow select,.formrow textarea{width:100%;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;font-family:inherit;background:#FBFDFB}
 .formrow input:focus,.formrow select:focus,.formrow textarea:focus{outline:none;border-color:var(--nba)}
-.btnrow{display:flex;gap:10px;margin-top:18px;justify-content:center}
-.btnrow .btn{min-width:130px;flex:0 0 auto}
+.btnrow{display:flex;gap:10px;margin-top:18px}
+.btnrow .btn{flex:1}
+/* tombol aksi nempel di bawah modal biar selalu kelihatan saat scroll */
+.modal .btnrow.stick{position:sticky;bottom:-26px;background:#fff;margin:18px -26px -26px;padding:14px 26px 26px;border-radius:0 0 24px 24px}
 .linkbtn{border:0;background:none;color:var(--nba);font-weight:700;font-size:13px;cursor:pointer;padding:4px 6px}
 .linkbtn.danger{color:#C0392B}
 /* wizard timbangan */
@@ -414,6 +410,12 @@ table.data{font-variant-numeric:tabular-nums}
 @media(max-width:900px){#steps{grid-template-columns:1fr 1fr}#steps .step{margin-right:0}}
 .lpin{width:38px;height:38px;border-radius:50%;border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:9px;letter-spacing:.3px}
 .lpin.pulse{animation:lpinPulse 2.2s ease-out infinite}
+.pickpin{position:relative;width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--gold);border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.pickpin::after{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;border-radius:50%;background:#fff;transform:translate(-50%,-50%)}
+/* titik biru lokasi user di peta */
+.myloc{width:18px;height:18px;border-radius:50%;background:#1E88E5;border:3px solid #fff;box-shadow:0 0 0 6px rgba(30,136,229,.25),0 2px 8px rgba(0,0,0,.3)}
+/* tombol GPS di peta */
+.locate-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:17px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center}
 @keyframes lpinPulse{0%{box-shadow:0 0 0 0 rgba(46,158,79,.55)}70%{box-shadow:0 0 0 16px rgba(46,158,79,0)}100%{box-shadow:0 0 0 0 rgba(46,158,79,0)}}
 .leaflet-popup-content{font-family:inherit !important;margin:14px 16px !important}
 .leaflet-popup-content b{font-size:14px}
@@ -421,34 +423,26 @@ table.data{font-variant-numeric:tabular-nums}
 /* === nasabah desktop full-width === */
 @media(min-width:900px){
   #view-nasabah{padding:0 !important}
-  .phone{max-width:none;margin:0;border-radius:0;border:0;overflow:visible;min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:248px 1fr;grid-template-rows:auto 1fr}
+  .phone{max-width:none;margin:0;border-radius:0;border:0;min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:248px 1fr;grid-template-rows:auto 1fr}
   .apphead{grid-column:2;grid-row:1;padding:26px 32px 4px;align-self:start}
-  .apphead .hi{font-size:13px;font-weight:500;color:#7A8F7E;margin-bottom:2px}
-  .apphead b.who{font-family:var(--font-display,"Bricolage Grotesque",sans-serif);font-size:26px;font-weight:800;letter-spacing:-.02em;color:#0B2B1F}
-  .tabbar{grid-column:1;grid-row:1/span 2;position:sticky;top:0;height:100vh;height:100dvh;align-self:start;overflow:visible;width:auto;transform:none;margin:0;left:auto;right:auto;bottom:auto;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;border:0;border-right:1px solid #E4ECE4;border-radius:0;padding:24px 14px 18px;color:#43584A;background:#FFFFFF}
-  .nsbrand{display:flex;align-items:center;gap:13px;padding:2px 10px 22px}
-  .nslogo{width:44px;height:44px;border-radius:15px;background:linear-gradient(135deg,#10B981,#0B5C3F);color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 10px 20px rgba(16,185,129,.32),inset 0 1px 0 rgba(255,255,255,.35)}
-  .nslogo svg{width:24px;height:24px;display:block}
-  .nstitle{font-family:var(--font-display,"Bricolage Grotesque",sans-serif);font-weight:800;color:#0B2B1F;font-size:19px;line-height:1.05;letter-spacing:-.02em}
-  .nstitle small{display:block;font-family:var(--font-sans,"Plus Jakarta Sans",sans-serif);font-size:8.5px;font-weight:700;color:#93A897;letter-spacing:.18em;text-transform:uppercase;margin-top:4px}
-  .nsnav{display:flex;flex-direction:column;gap:4px}
-  .tabbar button{flex:0 0 auto;flex-direction:row;justify-content:flex-start;align-items:center;gap:13px;font-size:14px;font-weight:600;padding:0 14px;height:46px;color:#43584A;background:transparent;border-radius:13px;width:100%;text-align:left;transition:background .15s ease,color .15s ease,box-shadow .15s ease}
-  .tabbar button .ti{width:auto;height:auto;border-radius:0;background:none;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:none}
-  .tabbar button .ti svg{width:21px;height:21px;color:#6E8873;transition:color .15s ease}
-  .tabbar button.on{background:linear-gradient(135deg,#10B981,#0B7A4E);color:#fff;box-shadow:0 10px 22px rgba(16,185,129,.38)}
-  .tabbar button.on .ti svg{color:#fff}
-  .tabbar button:not(.on):hover{background:#F1F7F2}
-  .tabbar button:not(.on):hover .ti svg{color:#0E9F6E}
-  .nsuser{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;margin-top:auto;padding:16px 10px 2px;border-top:1px solid #E4ECE4}
-  .nsava{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#10B981,#0B5C3F);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;box-shadow:0 6px 14px rgba(16,185,129,.32)}
-  .nsuinfo{min-width:0}
-  .nsuinfo b{display:block;color:#0B2B1F;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .nsuinfo small{display:block;color:#93A897;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .nsout{border:1px solid #E4ECE4;background:#fff;color:#93A897;width:36px;height:36px;border-radius:11px;cursor:pointer;flex:0 0 auto;display:flex;align-items:center;justify-content:center;transition:all .15s ease}
-  .nsout:hover{background:#FEF2F2;border-color:#FECACA;color:#DC2626}
-  .nsout svg{width:18px;height:18px;display:block}
-  .nslabel{display:none;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#A3B8A8;padding:0 14px 8px}
-  @media(min-width:900px){.nslabel{display:block}}
+  .tabbar{grid-column:1;grid-row:1/span 2;position:static;width:auto;transform:none;margin:0;left:auto;right:auto;bottom:auto;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;border:0;border-radius:0;padding:22px 16px 18px;color:#cfe0d2;background:radial-gradient(130% 55% at 50% 0%,rgba(52,211,153,.20),transparent 62%),linear-gradient(172deg,#062A20 0%,#0A3B2C 58%,#0C4A34 100%)}
+  .nsbrand{display:flex;align-items:center;gap:12px;padding:2px 8px 20px}
+  .nslogo{width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.13);display:flex;align-items:center;justify-content:center;font-size:21px;flex:0 0 auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+  .nstitle{font-weight:800;color:#fff;font-size:16.5px;line-height:1.15;letter-spacing:-.01em}
+  .nstitle small{display:block;font-size:10.5px;font-weight:600;color:#9fc3a8;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+  .nsnav{display:flex;flex-direction:column;gap:6px}
+  .tabbar button{flex-direction:row;justify-content:flex-start;align-items:center;gap:12px;font-size:13.5px;font-weight:600;padding:9px 10px;color:inherit;background:transparent;border-radius:13px;width:100%;text-align:left}
+  .tabbar button .ti{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.10);display:flex;align-items:center;justify-content:center;font-size:17px;flex:0 0 auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
+  .tabbar button.on{background:#fff;color:#0e3320;box-shadow:0 10px 24px rgba(0,0,0,.28)}
+  .tabbar button.on .ti{background:#e7f3ea;box-shadow:none}
+  .tabbar button:not(.on):hover{background:rgba(255,255,255,.08)}
+  .nsuser{display:flex;align-items:center;gap:11px;margin-top:auto;padding:12px 10px 4px;border-top:1px solid rgba(255,255,255,.12)}
+  .nsava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#10B981,#1e6b38);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex:0 0 auto;box-shadow:0 6px 14px rgba(0,0,0,.30)}
+  .nsuinfo{min-width:0;flex:1}
+  .nsuinfo b{display:block;color:#fff;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nsuinfo small{display:block;color:#9fc3a8;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nsout{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff;width:34px;height:34px;border-radius:10px;font-size:16px;cursor:pointer;flex:0 0 auto}
+  .nsout:hover{background:rgba(255,255,255,.16)}
   .appbody{grid-column:2;grid-row:2;border-radius:0;background:transparent;padding:22px 32px 32px}
   #np-beranda{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
   #np-beranda .saldo-hero{grid-column:1/-1;margin:2px 0 2px}
@@ -479,21 +473,18 @@ table.data{font-variant-numeric:tabular-nums}
   .main{min-width:0;overflow-x:hidden}
   .kascard b{white-space:nowrap;font-size:17px}
   .stat b{font-size:21px}
-  .side{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));top:auto;z-index:40;flex-direction:row;overflow-x:auto;padding:8px;gap:6px;align-items:center;scrollbar-width:none;background:linear-gradient(172deg,#062A20 0%,#0A3B2C 70%);border-radius:22px;box-shadow:0 12px 32px rgba(6,42,32,.38)}
+  .side{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));top:auto;flex-direction:row;overflow-x:auto;padding:10px;gap:8px;align-items:center;scrollbar-width:none;z-index:40;border-radius:20px;box-shadow:0 12px 32px rgba(0,0,0,.25)}
+  .dash{padding-bottom:76px}
   .side::-webkit-scrollbar{display:none}
   .side .sbrand{display:none}
-  .side .slabel{display:none}
-  .side .sfoot{display:contents;border:0;padding:0;margin:0}
-  .side>span[style]{display:none}
-  .slink{width:auto;flex:0 0 auto;white-space:nowrap;padding:10px 12px;font-size:12px;border-radius:14px}
-  .slink .e{font-size:16px}
+  .slink{width:auto;flex:0 0 auto;white-space:nowrap;padding:10px 14px;font-size:13px}
   .stat4{grid-template-columns:repeat(2,1fr)}
   .two{grid-template-columns:1fr}
   .nav-links{display:none}
   footer .cols{grid-template-columns:1fr}
   .panel{overflow-x:auto}
   .main table.data{min-width:560px}
-  .main{padding:18px 14px 96px}
+  .main{padding:18px 14px}
 }
 
 
@@ -1228,7 +1219,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   </div>
   <div class="mascot-card">
     <img data-asset="maskot" src="" alt="Maskot NBA">
-    <p>Hai, aku Moli! 🐱</p>
+    <p>Hai, aku NBA! 🐱</p>
     <small>Maskot Bank Sampah NBA — ayo pilah sampahmu!</small>
   </div>
 </div></header>
@@ -1280,7 +1271,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <section class="sec" id="peta"><div class="wrap">
   <div class="sec-h"><span class="tag">SEBARAN</span>
     <h2>Peta Titik Timbangan</h2>
-    <p>12 titik S-cale tersebar di Surakarta. Hijau = online, merah = offline, kuning = maintenance.</p>
+    <p><span id="titikCount">12</span> titik S-cale tersebar di Surakarta. Hijau = online, merah = offline, kuning = maintenance.</p>
   </div>
   <div class="mapsearch" style="max-width:520px;margin:0 0 14px"><input id="landingCari" placeholder="Cari nama / ID stasiun…" oninput="cariStasiunLanding()" autocomplete="off"><span class="msear">🔍</span><div id="landingHasil" class="mapresults" style="display:none"></div></div>
   <div class="mapbox">
@@ -1334,7 +1325,6 @@ svg.leaflet-image-layer.leaflet-interactive path {
   <div class="formrow"><label>Username / ID / No. HP</label><input id="liUser" placeholder="cth: NBA-2026-0042, 0812xxxx, atau admin" autocomplete="username"></div>
   <div class="formrow"><label>Password</label><input id="liPass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
   <div class="btnrow"><button class="btn btn-p" style="flex:1" onclick="doLogin()">Masuk</button></div>
-  <p class="fine" style="margin-top:10px">Akun demo — nasabah: <b>NBA-2026-0042</b> / nasabah123 · admin: <b>admin</b> / admin123</p>
   
   <p style="margin:16px 0 0;font-size:13.5px;color:var(--mut)">Belum punya akun? <a href="javascript:void(0)" onclick="openRegister()" style="color:var(--nba);font-weight:700">Daftar sebagai nasabah</a></p>
   <p style="margin:10px 0 0"><a href="#beranda" onclick="go('landing')" style="color:var(--nba);font-weight:700">← Kembali ke beranda</a></p>
@@ -1355,7 +1345,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="npanel" id="np-beranda">
       <div class="saldo-hero">
         <div><small>Saldo Aktif</small><div class="snum">Rp 125.000</div><small>28,5 Kg disetor &middot; 24 transaksi</small></div>
-        <img data-asset="maskot" src="" alt="Moli">
+        <img data-asset="maskot" src="" alt="NBA">
       </div>
       <div class="qgrid">
         <button onclick="showNp('setor')"><span class="qe">⚖️</span><span>Setor</span></button>
@@ -1363,14 +1353,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
         <button onclick="showNp('harga')"><span class="qe">💲</span><span>Harga</span></button>
         <button onclick="showNp('akun')"><span class="qe">👤</span><span>Akun</span></button>
       </div>
-      <div class="panel grafik-panel"><h3>📊 Grafik Setoran</h3><div class="gwrap" id="grafikWrap"></div></div>
       <div class="panel"><h3>Setoran Terakhir</h3>
         <table class="data"><tbody>
           <tr><td data-label="Waktu">Hari ini &middot; 10.05</td><td data-label="Kategori">Plastik PET</td><td data-label="Total" style="text-align:right"><b>Rp 7.050</b></td></tr>
           <tr><td data-label="Waktu">Kemarin &middot; 16.20</td><td data-label="Kategori">Kardus</td><td data-label="Total" style="text-align:right"><b>Rp 3.000</b></td></tr>
         </tbody></table>
       </div>
-      <div class="panel molitip"><h3>Tips dari Moli</h3><p>Pisahkan tutup botol dari badannya &mdash; tutup punya harga sendiri lho, Rp 2.500/kg!</p></div>
+      <div class="panel molitip"><h3>Tips dari NBA</h3><p>Pisahkan tutup botol dari badannya &mdash; tutup punya harga sendiri lho, Rp 2.500/kg!</p></div>
     </div>
     <div class="npanel" id="np-setor" style="display:none">
       <h2 class="apptitle">Setor Sampah</h2>
@@ -1448,17 +1437,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
       <p class="fine" style="text-align:center;margin-top:14px">NBA Bank Sampah Digital &middot; demo v1.0</p>
     </div>
   </div>
-  <nav class="tabbar">
-    <div class="nsbrand"><span class="nslogo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 18.5C5.5 11 10.5 6 19 5c-.8 8.5-5.5 13.5-13.5 13.5z"/><path d="M5.5 18.5C8.5 13.5 12.5 10 17 8"/></svg></span><span class="nstitle">NBA<small>Bank Sampah Digital</small></span></div>
-    <div class="nslabel">Menu Utama</div>
+  <nav class="tabbar" aria-label="Navigasi utama">
+    <div class="nsbrand"><span class="nslogo">♻️</span><span class="nstitle">NBA<small>Bank Sampah Digital</small></span></div>
     <div class="nsnav">
-    <button class="on" data-np="beranda" onclick="showNp('beranda')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg></span><span>Beranda</span></button>
-    <button data-np="setor" onclick="showNp('setor')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16"/><path d="M8 20h8"/><path d="M5 6.5h14"/><path d="M7.5 6.5 5 12.5h5L7.5 6.5z"/><path d="M16.5 6.5 14 12.5h5l-2.5-6z"/></svg></span><span>Setor</span></button>
-    <button data-np="riwayat" onclick="showNp('riwayat')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.5-2 1.5-2-1.5L10 21l-2-1.5L6 21V3z"/><path d="M9.5 8.5h5"/><path d="M9.5 12h5"/></svg></span><span>Riwayat</span></button>
-    <button data-np="harga" onclick="showNp('harga')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 12.8 21.2a1.5 1.5 0 0 1-2.1 0L3 13.5V3h10.5l7.1 7.1a1.5 1.5 0 0 1 0 2.1z"/><circle cx="7.5" cy="7.5" r="1.3"/></svg></span><span>Harga</span></button>
-    <button data-np="akun" onclick="showNp('akun')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.2-3.8 4-5.5 7.5-5.5s6.3 1.7 7.5 5.5"/></svg></span><span>Akun</span></button>
+    <button class="on" data-np="beranda" onclick="showNp('beranda')"><span class="ti">🏠</span><span>Beranda</span></button>
+    <button data-np="setor" onclick="showNp('setor')"><span class="ti">⚖️</span><span>Setor</span></button>
+    <button data-np="riwayat" onclick="showNp('riwayat')"><span class="ti">🧾</span><span>Riwayat</span></button>
+    <button data-np="harga" onclick="showNp('harga')"><span class="ti">💲</span><span>Harga</span></button>
+    <button data-np="akun" onclick="showNp('akun')"><span class="ti">👤</span><span>Akun</span></button>
     </div>
-    <div class="nsuser"><span class="nsava">?</span><span class="nsuinfo"><b class="who">–</b><small data-user-id>–</small></span><button class="nsout" onclick="logout()" title="Keluar" aria-label="Keluar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3"/><path d="m15 16 4-4-4-4"/><path d="M19 12H9"/></svg></button></div>
+    <div class="nsuser"><span class="nsava">?</span><span class="nsuinfo"><b class="who">–</b><small data-user-id>–</small></span><button class="nsout" onclick="logout()" title="Keluar" aria-label="Keluar">⏻</button></div>
   </nav>
 </div>
 </div>
@@ -1467,22 +1455,18 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <div id="view-admin" style="display:none">
 <div class="dash">
   <aside class="side">
-    <div class="sbrand"><img data-asset="logo" src="" alt=""><span>NBA<small>ADMIN PANEL</small></span></div>
-    <div class="slabel">Operasional</div>
+    <div class="sbrand"><img data-asset="logo" src="" alt=""> NBA Admin</div>
     <button class="slink on" data-ap="dash"><span class="e">📊</span>Dashboard</button>
     <button class="slink" data-ap="peta"><span class="e">🗺️</span>Peta Timbangan</button>
     <button class="slink" data-ap="trx"><span class="e">🧾</span>Transaksi</button>
-    <button class="slink" data-ap="lap"><span class="e">📑</span>Laporan</button>
-    <div class="slabel">Data Master</div>
     <button class="slink" data-ap="nasabah"><span class="e">👥</span>Nasabah</button>
     <button class="slink" data-ap="stasiun"><span class="e">⚙️</span>Data Stasiun</button>
     <button class="slink" data-ap="harga"><span class="e">💲</span>Data Harga</button>
+    <button class="slink" data-ap="lap"><span class="e">📑</span>Laporan</button>
     <button class="slink" data-ap="berita"><span class="e">📰</span>Berita</button>
     <span style="flex:1"></span>
-    <div class="sfoot">
     <button class="slink" onclick="gantiPassForm()"><span class="e">🔑</span>Ganti Password</button>
 <button class="slink" onclick="go('landing')"><span class="e">🚪</span>Keluar</button>
-    </div>
   </aside>
   <div class="main">
     <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-bottom:4px">
@@ -1495,7 +1479,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
         <div class="mapsearch"><input id="dashCari" placeholder="Cari stasiun — pilih untuk lompat ke peta…" oninput="cariStasiunDash()" autocomplete="off"><span class="msear">🔍</span><div id="dashHasil" class="mapresults" style="display:none"></div></div>
       </div>
       <div class="stat4">
-        <div class="stat" style="border-color:var(--blue)"><small>🏭 Total Stasiun</small><b>12</b></div>
+        <div class="stat" style="border-color:var(--blue)"><small>🏭 Total Stasiun</small><b id="statStasiun">12</b></div>
         <div class="stat" style="border-color:var(--leaf)"><small>🧾 Total Transaksi</small><b>1.248</b></div>
         <div class="stat" style="border-color:var(--orange)"><small>⚖️ Total Berat</small><b>3.542 Kg</b></div>
         <div class="stat" style="border-color:var(--purple)"><small>💰 Total Nilai</small><b>Rp 14,28 jt</b></div>
@@ -1514,6 +1498,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
           <span style="flex:1"></span>
           <button class="btn btn-o" style="padding:9px 18px;font-size:13px" onclick="kasTerima()">+ Terima dari Pengelola</button>
         </div>
+      </div>
+      <div class="panel grafik-panel"><h3>📊 Grafik Pengumpulan Sampah</h3>
+        <div class="gwrap" id="grafikBsuWrap"></div>
+        <div class="gwrap" id="grafikTotalWrap" style="margin-top:18px"></div>
       </div>
       <div class="panel"><h3>🧾 Transaksi Terbaru</h3>
         <table class="data"><thead><tr><th>Waktu</th><th>User</th><th>Stasiun</th><th>Kategori</th><th>Berat</th><th style="text-align:right">Total</th></tr></thead>
@@ -1549,7 +1537,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     </div>
     <div id="ap-nasabah" style="display:none">
       <h1>Data Nasabah</h1><p class="sub">Kelola akun warga — ubah data, reset password, nonaktifkan</p>
-      <div class="panel"><div style="overflow-x:auto"><table class="data"><thead><tr><th>ID</th><th>Nama</th><th>No. HP</th><th>Saldo</th><th>Total</th><th>Status</th><th style="text-align:right">Aksi</th></tr></thead>
+      <div class="panel"><div style="overflow-x:auto"><table class="data"><thead><tr><th>ID</th><th>Nama</th><th>Unit BSU</th><th>No. HP</th><th>Saldo</th><th>Total</th><th>Status</th><th style="text-align:right">Aksi</th></tr></thead>
       <tbody id="userRows"></tbody></table></div></div>
     </div>
     <div id="ap-stasiun" style="display:none">

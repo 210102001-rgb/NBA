@@ -3,7 +3,7 @@
    - API (/nba/api/): selalu network, tidak pernah di-cache.
    - Navigasi: network-first, fallback ke cache saat offline. */
 'use strict';
-const CACHE = 'nba-v1';
+const CACHE = 'nba-v5';
 const SHELL = [
   './',
   './index.html',

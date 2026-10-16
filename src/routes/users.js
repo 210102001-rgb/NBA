@@ -35,7 +35,7 @@ module.exports = function userRoutes(db) {
   r.put('/:id', requireAdmin, (req, res) => {
     const u = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id);
     if (!u) return res.status(404).json({ error: 'user tidak ditemukan' });
-    const { nama, tel, aktif, password } = req.body || {};
+    const { nama, tel, aktif, password, unit } = req.body || {};
     if (req.params.id === req.session.userId && aktif === false) {
       return res.status(400).json({ error: 'tidak bisa menonaktifkan akun sendiri' });
     }
@@ -46,6 +46,7 @@ module.exports = function userRoutes(db) {
       updates.push('nama = ?'); params.push(String(nama).trim());
     }
     if (tel !== undefined) { updates.push('tel = ?'); params.push(String(tel).replace(/\D/g, '')); }
+    if (unit !== undefined) { updates.push('unit = ?'); const uv = String(unit).trim(); params.push(uv ? uv : null); }
     if (aktif !== undefined) { updates.push('aktif = ?'); params.push(aktif ? 1 : 0); }
     if (password) {
       if (password.length < 6) return res.status(400).json({ error: 'password minimal 6 karakter' });

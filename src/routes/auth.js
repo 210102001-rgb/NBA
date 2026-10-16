@@ -44,7 +44,7 @@ module.exports = function authRoutes(db) {
 
   /* Pendaftaran nasabah baru (publik). Langsung login setelah daftar. */
   r.post('/register', (req, res) => {
-    const { nama, tel, alamat, password } = req.body || {};
+    const { nama, tel, alamat, password, unit } = req.body || {};
     const telBersih = String(tel || '').replace(/\D/g, '');
     if (!nama || !nama.trim()) return res.status(400).json({ error: 'nama wajib' });
     if (telBersih.length < 10) return res.status(400).json({ error: 'no. HP minimal 10 digit' });
@@ -56,9 +56,9 @@ module.exports = function authRoutes(db) {
     const id = 'NBA-2026-' + pad;
     const sejak = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
     try {
-      db.prepare(`INSERT INTO users(id, username, nama, password_hash, role, tel, nfc, sejak)
-                  VALUES (?,?,?,?, 'nasabah',?,?,?)`)
-        .run(id, id, nama.trim(), bcrypt.hashSync(password, 10), telBersih, 'NFC-2026-' + pad, sejak);
+      db.prepare(`INSERT INTO users(id, username, nama, password_hash, role, tel, nfc, sejak, unit)
+                  VALUES (?,?,?,?, 'nasabah',?,?,?,?)`)
+        .run(id, id, nama.trim(), bcrypt.hashSync(password, 10), telBersih, 'NFC-2026-' + pad, sejak, String(unit || '').trim() || null);
     } catch (e) {
       return res.status(409).json({ error: 'pendaftaran gagal, coba lagi' });
     }
