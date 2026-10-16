@@ -145,29 +145,12 @@ function fmtTgl(){
 }
 
 /* ═══ render ═══ */
-/* Tab aktif disimpan di URL hash (#admin-trx) agar refresh tetap di halaman yang sama */
-const ADMIN_TABS = ["dash","peta","trx","nasabah","stasiun","harga","lap","berita"];
-const NP_TABS = ["beranda","setor","riwayat","harga","akun"];
-function readHashTab(view){
-  const m = (location.hash||"").match(/^#([a-z]+)-([a-z]+)$/);
-  if(!m || m[1]!==view) return null;
-  const valid = view==="admin" ? ADMIN_TABS : NP_TABS;
-  return valid.includes(m[2]) ? m[2] : null;
-}
-function writeHashTab(view, tab){
-  try{ history.replaceState(null,"","#"+view+"-"+tab); }catch(e){}
-}
-function clearHashTab(){
-  try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}
-}
-function restoreAdminTab(){ goAdminTab(readHashTab("admin") || "dash"); }
 function go(v){
   ["landing","masuk","nasabah","admin"].forEach(k=>{
     document.getElementById("view-"+k).style.display = k===v ? "" : "none";
   });
   document.querySelectorAll(".nav-links a").forEach(a=>a.classList.remove("on"));
-  if(v === "nasabah" && typeof showNp === "function") showNp(readHashTab("nasabah") || "beranda");
-  if(v === "admin") restoreAdminTab();
+  if(v === "nasabah" && typeof showNp === "function") showNp("beranda");
   animateIn(document.getElementById("view-"+v), "anim-fade");
   window.scrollTo(0,0);
 }
@@ -197,7 +180,6 @@ function countUp(el, target){
   requestAnimationFrame(f);
 }
 function showNp(k){
-  writeHashTab("nasabah", k);
   ["beranda","setor","riwayat","harga","akun"].forEach(x=>{
     const p = document.getElementById("np-"+x);
     p.style.display = x===k ? "" : "none";
@@ -245,11 +227,15 @@ function trxRows(full){
   return DB.transaksi.slice(0, full?50:6).map(t=>{
     const st = t.status==="Selesai" ? '<span class="pill g">Selesai</span>' : '<span class="pill o">Menunggu</span>';
     const tipe = t.tipe==="tarik" ? "Tarik Tunai" : t.kategori;
-    return `<tr onclick="showTrxDetail('${t.id}')" style="cursor:pointer"><td data-label="Waktu">${t.tgl.split(" · ")[1]||t.tgl}</td><td data-label="User">${t.nama}</td><td data-label="Stasiun">${t.stasiun}</td><td data-label="Kategori">${tipe}</td><td data-label="Berat">${String(t.berat).replace(".",",")} ${t.satuan||"Kg"}</td>${full?`<td data-label="Harga/Kg">${rp(t.harga)}</td>`:""}<td data-label="Total" style="text-align:right;font-weight:700">${t.tipe==="tarik"?"−":"+"}${rp(t.total)}</td>${full?`<td data-label="Status">${st}</td>`:""}</tr>`;
+    const unitLbl = unitOfUser(t.userId);
+    const namaCell = t.nama + (unitLbl ? `<br><small style="color:var(--mut)">${unitLbl}</small>` : "");
+    return `<tr onclick="showTrxDetail('${t.id}')" style="cursor:pointer"><td data-label="Waktu">${t.tgl.split(" · ")[1]||t.tgl}</td><td data-label="User">${namaCell}</td><td data-label="Stasiun">${t.stasiun}</td><td data-label="Kategori">${tipe}</td><td data-label="Berat">${String(t.berat).replace(".",",")} ${t.satuan||"Kg"}</td>${full?`<td data-label="Harga/Kg">${rp(t.harga)}</td>`:""}<td data-label="Total" style="text-align:right;font-weight:700">${t.tipe==="tarik"?"−":"+"}${rp(t.total)}</td>${full?`<td data-label="Status">${st}</td>`:""}</tr>`;
   }).join("");
 }
 function stDot(s){ return s==="Online"?"g":(s==="Offline"?"o":"b"); }
 function renderStasiunRows(){
+  const jum = document.getElementById("statStasiun");
+  if(jum) jum.textContent = (DB.stasiun||[]).length;
   document.getElementById("stasiunRows").innerHTML = DB.stasiun.map(s=>
     `<tr onclick="showStasiunDetail('${s.id}')" style="cursor:pointer"><td data-label="ID"><b>${s.id}</b></td><td data-label="Nama">${s.nama}</td><td data-label="Lokasi">${s.lokasi}</td><td data-label="Status"><span class="pill ${stDot(s.status)}">${s.status}</span></td><td data-label="Transaksi Hari Ini">${s.trxHari}</td><td data-label="Aksi" style="text-align:right;white-space:nowrap"><button class="linkbtn" onclick="event.stopPropagation();stasiunForm('${s.id}')">Ubah</button><button class="linkbtn danger" onclick="event.stopPropagation();delStasiun('${s.id}')">Hapus</button></td></tr>`).join("");
 }
@@ -265,7 +251,40 @@ const pinMarkersLanding = {};
 function pinIcon(s, selected){
   return L.divIcon({ className: "", html: '<div class="lpin' + (s.status==="Online"?" pulse":"") + (selected?" sel":"") + '" style="background:' + pinColor(s.status) + '">' + s.id.replace("ST-","") + '</div>', iconSize: [38,38], iconAnchor: [19,19] });
 }
+/* pin untuk map picker form stasiun (pengganti ikon default Leaflet yg broken) */
+function pickIcon(){
+  return L.divIcon({ className: "", html: '<div class="pickpin"></div>', iconSize: [32,32], iconAnchor: [16,30] });
+}
+/* tombol GPS di sudut peta — tampilkan posisi user */
+const myLocMarkers = {};
+function addLocateControl(m, key){
+  const Ctl = L.Control.extend({
+    onAdd: function(){
+      const b = L.DomUtil.create("button", "locate-btn");
+      b.innerHTML = "📍"; b.title = "Lokasi saya"; b.setAttribute("aria-label", "Tampilkan lokasi saya");
+      L.DomEvent.on(b, "click", e=>{
+        L.DomEvent.stopPropagation(e);
+        if(!navigator.geolocation){ showAlert("Browser tidak mendukung GPS.", "err"); return; }
+        b.textContent = "⏳";
+        navigator.geolocation.getCurrentPosition(pos=>{
+          b.textContent = "📍";
+          const la = pos.coords.latitude, ln = pos.coords.longitude;
+          m.flyTo([la, ln], 14, { duration: 1 });
+          if(myLocMarkers[key]) myLocMarkers[key].setLatLng([la, ln]);
+          else myLocMarkers[key] = L.marker([la, ln], { icon: L.divIcon({ className:"", html:'<div class="myloc"></div>', iconSize:[18,18], iconAnchor:[9,9] }) }).addTo(m);
+        }, err=>{
+          b.textContent = "📍";
+          showAlert("Gagal dapat lokasi: " + (err.code===1 ? "izin GPS ditolak." : "coba lagi."), "err");
+        }, { enableHighAccuracy: true, timeout: 10000 });
+      });
+      return b;
+    }
+  });
+  m.addControl(new Ctl({ position: "topright" }));
+}
 function renderMapPins(){
+  const tc = document.getElementById("titikCount");
+  if(tc) tc.textContent = (DB.stasiun||[]).length;
   const ids = ["leafletMap", "leafletMapAdmin"];
   if(typeof L === "undefined"){
     ids.forEach(id=>{
@@ -281,6 +300,7 @@ function renderMapPins(){
       const m = L.map(id, { scrollWheelZoom: false }).setView(SKA_CENTER, 13);
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap" }).addTo(m);
       leafMaps[id] = m;
+      addLocateControl(m, id);
     }
     const m = leafMaps[id];
     m.eachLayer(l=>{ if(l instanceof L.Marker) m.removeLayer(l); });
@@ -454,7 +474,7 @@ function openBerita(i){
 }
 
 
-/* ═══ grafik dashboard nasabah (SVG murni) ═══ */
+/* ═══ grafik admin: per-BSU + total keseluruhan (SVG murni) ═══ */
 const BULAN_ID = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
 const KAT_WARNA = { Plastik:"#2E9E4F", Kertas:"#F9A825", Logam:"#78909C", Kaca:"#29B6F6", Organik:"#8D6E63" };
 function warnaKat(k){ return KAT_WARNA[k] || "#7CB342"; }
@@ -465,48 +485,63 @@ function parseTglSingkat(tgl){
   if(mi<0) return null;
   return { d:+m[1], m:mi, y:+m[3] };
 }
-function renderGrafik(){
-  const u = currentUser(); if(!u) return;
-  const el = document.getElementById("grafikWrap"); if(!el) return;
-  const trx = DB.transaksi.filter(t=>t.userId===u.id && t.tipe==="setor");
-  /* --- bar: berat per bulan, 6 bulan terakhir --- */
-  const now = new Date(), months = [];
-  for(let i=5;i>=0;i--){ const d = new Date(now.getFullYear(), now.getMonth()-i, 1); months.push({y:d.getFullYear(), m:d.getMonth(), kg:0}); }
-  trx.forEach(t=>{ const p = parseTglSingkat(t.tgl); if(!p) return;
-    const mx = months.find(x=>x.y===p.y && x.m===p.m); if(mx) mx.kg += (+t.berat||0); });
-  const maxKg = Math.max.apply(null, months.map(m=>m.kg).concat([1]));
-  const W=320, H=176, padB=26, padT=16, bw=W/months.length;
-  const baseY = H-padB;
+/* bar chart generik: data = [{label, kg}] */
+function svgBars(data, gid){
+  const W = Math.max(320, data.length*44), H = 190, padB = 34, padT = 18;
+  const maxKg = Math.max.apply(null, data.map(d=>d.kg).concat([1]));
+  const bw = W/data.length, baseY = H-padB;
   let bars = `<line x1="0" y1="${baseY}" x2="${W}" y2="${baseY}" stroke="#CBD8CC" stroke-width="1.5"/>`;
-  bars += `<line x1="0" y1="${(padT+baseY)/2}" x2="${W}" y2="${(padT+baseY)/2}" stroke="#EDF2EA" stroke-width="1" stroke-dasharray="4 4"/>`;
-  months.forEach((m,i)=>{
-    const h = Math.max(3,(m.kg/maxKg)*(H-padB-padT));
-    const x = i*bw+bw*0.22, w = bw*0.56, y = H-padB-h, cx = x+w/2, cur = i===months.length-1;
-    bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="5" fill="${cur?"url(#ggrad)":"#CDE6D2"}"/>`;
-    if(m.kg>0) bars += `<text x="${cx.toFixed(1)}" y="${(y-5).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="700" fill="#16442B">${m.kg.toFixed(1)}</text>`;
-    bars += `<text x="${cx.toFixed(1)}" y="${H-9}" text-anchor="middle" font-size="10" fill="#6B7A6E">${BULAN_ID[m.m]}</text>`;
+  bars += `<line x1="0" y1="${((padT+baseY)/2).toFixed(1)}" x2="${W}" y2="${((padT+baseY)/2).toFixed(1)}" stroke="#EDF2EA" stroke-width="1" stroke-dasharray="4 4"/>`;
+  data.forEach((d,i)=>{
+    const h = Math.max(3,(d.kg/maxKg)*(H-padB-padT));
+    const x = i*bw+bw*0.2, w = bw*0.6, y = H-padB-h, cx = x+w/2, cur = i===data.length-1;
+    bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="5" fill="${cur?"url(#"+gid+")":"#CDE6D2"}"><title>${d.label}: ${d.kg.toFixed(1)} Kg</title></rect>`;
+    if(d.kg>0) bars += `<text x="${cx.toFixed(1)}" y="${(y-5).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="700" fill="#16442B">${d.kg.toFixed(1)}</text>`;
+    bars += `<text x="${cx.toFixed(1)}" y="${H-9}" text-anchor="middle" font-size="9.5" fill="#6B7A6E">${d.label}</text>`;
   });
-  const barSvg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="Grafik berat setoran per bulan"><defs><linearGradient id="ggrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#35A85C"/><stop offset="1" stop-color="#1E6B38"/></linearGradient></defs>${bars}</svg>`;
-  /* --- donut: komposisi kategori --- */
-  const kat = {};
-  trx.forEach(t=>{ const k=t.kategori||"Lainnya"; kat[k]=(kat[k]||0)+(+t.berat||0); });
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="Grafik berat sampah"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#35A85C"/><stop offset="1" stop-color="#1E6B38"/></linearGradient></defs>${bars}</svg>`;
+}
+function svgDonut(kat){
   const total = Object.values(kat).reduce((a,b)=>a+b,0);
-  let donutHtml;
-  if(total<=0){
-    donutHtml = `<div class="gempty">Belum ada data setoran.</div>`;
-  } else {
-    const R=54, C=2*Math.PI*R;
-    let off=0, segs="";
-    Object.entries(kat).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{
-      const f=v/total;
-      segs += `<circle cx="70" cy="70" r="${R}" fill="none" stroke="${warnaKat(k)}" stroke-width="20" stroke-dasharray="${(f*C).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-off*C).toFixed(1)}" transform="rotate(-90 70 70)"/>`;
-      off += f;
-    });
-    const legend = Object.entries(kat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>
-      `<div><span class="gdot" style="background:${warnaKat(k)}"></span><span>${k}</span><b>${v.toFixed(1)} Kg</b></div>`).join("");
-    donutHtml = `<div class="gdonut"><svg viewBox="0 0 140 140" style="width:128px;height:128px;flex:0 0 auto" role="img" aria-label="Komposisi kategori sampah">${segs}<text x="70" y="67" text-anchor="middle" font-size="17" font-weight="800" fill="#0E3320">${total.toFixed(1)}</text><text x="70" y="85" text-anchor="middle" font-size="10.5" fill="#6B7A6E">Kg</text></svg><div class="glegend">${legend}</div></div>`;
+  if(total<=0) return `<div class="gempty">Belum ada data setoran.</div>`;
+  const R=54, C=2*Math.PI*R;
+  let off=0, segs="";
+  Object.entries(kat).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{
+    const f=v/total;
+    segs += `<circle cx="70" cy="70" r="${R}" fill="none" stroke="${warnaKat(k)}" stroke-width="20" stroke-dasharray="${(f*C).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-off*C).toFixed(1)}" transform="rotate(-90 70 70)"/>`;
+    off += f;
+  });
+  const legend = Object.entries(kat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>
+    `<div><span class="gdot" style="background:${warnaKat(k)}"></span><span>${k}</span><b>${v.toFixed(1)} Kg</b></div>`).join("");
+  return `<div class="gdonut"><svg viewBox="0 0 140 140" style="width:128px;height:128px;flex:0 0 auto" role="img" aria-label="Komposisi kategori sampah">${segs}<text x="70" y="67" text-anchor="middle" font-size="17" font-weight="800" fill="#0E3320">${total.toFixed(1)}</text><text x="70" y="85" text-anchor="middle" font-size="10.5" fill="#6B7A6E">Kg</text></svg><div class="glegend">${legend}</div></div>`;
+}
+function namaPendekBSU(s){
+  return (s.nama||s.id||"").replace(/^(BSU|Bank Sampah)\s+/i,"").slice(0,12);
+}
+function renderGrafikAdmin(){
+  const elBsu = document.getElementById("grafikBsuWrap");
+  const elTot = document.getElementById("grafikTotalWrap");
+  if(!elBsu && !elTot) return;
+  const trx = (DB.transaksi||[]).filter(t=>t.tipe==="setor");
+  /* --- per BSU: total Kg per stasiun --- */
+  if(elBsu){
+    const perBsu = {};
+    trx.forEach(t=>{ const sid = t.stasiun||"?"; perBsu[sid]=(perBsu[sid]||0)+(+t.berat||0); });
+    const data = (DB.stasiun||[]).map(s=>({ label: namaPendekBSU(s), kg: perBsu[s.id]||0 }));
+    elBsu.innerHTML = data.length
+      ? `<div class="gcol" style="flex:1 1 100%"><h4>Berat terkumpul per BSU (Kg)</h4>${svgBars(data,"ggradBsu")}</div>`
+      : `<div class="gempty">Belum ada data stasiun.</div>`;
   }
-  el.innerHTML = `<div class="gcol"><h4>Berat per bulan (Kg)</h4>${barSvg}</div><div class="gcol"><h4>Komposisi kategori</h4>${donutHtml}</div>`;
+  /* --- total keseluruhan: per bulan + komposisi --- */
+  if(elTot){
+    const now = new Date(), months = [];
+    for(let i=5;i>=0;i--){ const d = new Date(now.getFullYear(), now.getMonth()-i, 1); months.push({label:BULAN_ID[d.getMonth()], y:d.getFullYear(), m:d.getMonth(), kg:0}); }
+    trx.forEach(t=>{ const p = parseTglSingkat(t.tgl); if(!p) return;
+      const mx = months.find(x=>x.y===p.y && x.m===p.m); if(mx) mx.kg += (+t.berat||0); });
+    const kat = {};
+    trx.forEach(t=>{ const k=t.kategori||"Lainnya"; kat[k]=(kat[k]||0)+(+t.berat||0); });
+    elTot.innerHTML = `<div class="gcol"><h4>Total berat per bulan (Kg)</h4>${svgBars(months,"ggradTot")}</div><div class="gcol"><h4>Komposisi kategori — keseluruhan</h4>${svgDonut(kat)}</div>`;
+  }
 }
 
 
@@ -529,7 +564,6 @@ function renderNasabah(){
   document.querySelectorAll("[data-user-tel]").forEach(e=>e.textContent = u.tel?u.tel.replace(/(\d{4})(\d+)(\d{4})/,"$1\u2022\u2022\u2022\u2022$3"):"-");
   document.querySelectorAll("[data-user-sejak]").forEach(e=>e.textContent = u.sejak);
   document.querySelectorAll(".snum2").forEach(e=>e.textContent = rp(u.saldo));
-  try{ renderGrafik(); }catch(e){ console.warn("grafik:", e); }
   const av = document.querySelector(".avatar");
   if(av) av.textContent = u.nama.charAt(0).toUpperCase();
   const ph = document.querySelector(".profile-head b");
@@ -556,6 +590,7 @@ function renderAll(){
   document.getElementById("adminRows").innerHTML = trxRows(false);
   document.getElementById("adminRows2").innerHTML = trxRows(true);
   renderUserRows();
+  try{ renderGrafikAdmin(); }catch(e){ console.warn("grafik admin:", e); }
 }
 async function init(){
   const l = document.getElementById("loader");
@@ -574,28 +609,23 @@ async function init(){
   }
   l.classList.remove("show"); setTimeout(()=>{ l.style.display = "none"; }, 280);
   renderAll(); renderBeritaRows(); fillStasiunFilter();
+  /* kembali ke view sesuai sesi login (biar refresh tidak mental ke landing) */
+  if(ME) go(ME.role === "admin" ? "admin" : "nasabah");
+  else go("landing");
   const tgl = document.getElementById("offlineToggle");
   if(tgl) tgl.checked = DB.offline;
   document.getElementById("modalOv").addEventListener("click", e=>{ if(e.target.id==="modalOv") closeModal(); });
   document.querySelectorAll(".slink[data-ap]").forEach(b=>b.addEventListener("click",()=>{
     document.querySelectorAll(".slink[data-ap]").forEach(x=>x.classList.remove("on")); b.classList.add("on");
-    writeHashTab("admin", b.dataset.ap);
     ["dash","peta","trx","nasabah","stasiun","harga","lap","berita"].forEach(k=>{
       const p = document.getElementById("ap-"+k);
       p.style.display = k===b.dataset.ap ? "" : "none";
       if(k===b.dataset.ap){ animateIn(p, "anim-up"); if(k==="peta") refreshAdminMap(); }
     });
   }));
-  /* Refresh: kalau sesi masih valid & URL menunjuk tab, kembali ke halaman terakhir */
-  if(ME){
-    const vw = readHashTab("admin") ? "admin" : (readHashTab("nasabah") ? "nasabah" : null);
-    if(vw === "admin" && ME.role === "admin") go("admin");
-    else if(vw === "nasabah" && ME.role !== "admin") go("nasabah");
-  }
 }
 /* ═══ fitur v2 · bagian 1: modal, notifikasi, detail, struk, QR ═══ */
-function openModal(html){
-  document.getElementById("modalBox").innerHTML = html;
+function openModal(html){  document.getElementById("modalBox").innerHTML = html;
   const ov = document.getElementById("modalOv");
   ov.style.display = "flex";
   requestAnimationFrame(()=>ov.classList.add("show"));
@@ -686,7 +716,7 @@ function printReceipt(id){
       <div class="rrow"><span>Jenis</span><span>${t.tipe==="tarik"?"Penarikan":t.kategori}</span></div>
       ${t.tipe==="setor"?`<div class="rrow"><span>Berat</span><span>${String(t.berat).replace(".",",")} ${t.satuan||"Kg"}</span></div><div class="rrow"><span>Harga</span><span>${rp(t.harga)}/${t.satuan||"Kg"}</span></div>`:`<div class="rrow"><span>Metode</span><span>${t.metode||"Tunai"}</span></div>`}
       <div class="rtotal"><span>TOTAL</span><span>${t.tipe==="tarik"?"\u2212":"+"}${rp(t.total)}</span></div>
-      <div class="rc" style="margin-top:14px">Terima kasih telah menabung sampah!<br>\u{0001F431} Moli</div>
+      <div class="rc" style="margin-top:14px">Terima kasih telah menabung sampah!<br>\u{0001F431} NBA</div>
     </div>`;
   const pa = document.getElementById("printArea");
   pa.style.display = "";
@@ -743,7 +773,7 @@ function renderSimStep(){
   if(sim.step === 1){
     body = `<div style="text-align:center"><span class="simcomp">S-Cell · Sensor Timbang</span></div><div class="scale-display"><div class="wval" id="wVal">0,00</div><small>KILOGRAM</small></div>
       <p class="fine" style="text-align:center">Letakkan sampah di atas timbangan, lalu kunci berat.</p>
-      <div class="btnrow"><button class="btn btn-p" id="wBtn" onclick="simWeigh()">\u2696\uFE0F Mulai Timbang</button></div>`;
+      <div class="btnrow stick"><button class="btn btn-p" id="wBtn" onclick="simWeigh()">\u2696\uFE0F Mulai Timbang</button></div>`;
   } else if(sim.step === 2){
     body = `<div style="text-align:center"><span class="simcomp">S-Eye · Kamera AI</span></div><div class="scanline"></div>
       <p class="fine" style="text-align:center" id="aiTxt">AI sedang memindai sampah&hellip;</p>
@@ -752,7 +782,7 @@ function renderSimStep(){
           <select id="simCat" onchange="fillSimItems()">${cats.map(c=>`<option>${c}</option>`).join("")}</select></div>
         <div class="formrow"><label>Jenis sampah</label><select id="simItem"></select></div>
       </div>
-      <div class="btnrow"><button class="btn btn-o" onclick="sim.step=1;renderSimStep()">\u2190 Ulangi</button>
+      <div class="btnrow stick"><button class="btn btn-o" onclick="sim.step=1;renderSimStep()">\u2190 Ulangi</button>
       <button class="btn btn-p" id="aiNext" onclick="simNext()" disabled>Lanjut \u2192</button></div>`;
   } else if(sim.step === 3){
     body = `<div style="text-align:center"><span class="simcomp">S-Tap · Pembaca NFC</span></div><div class="nfc-card" id="nfcTap" onclick="simTap()">
@@ -760,7 +790,7 @@ function renderSimStep(){
         <small>Kartu NFC &middot; ${u.nama}</small><br><b>${u.nfc}</b>
         <p style="margin:12px 0 0;font-size:13px;color:#BFE3C6" id="tapTxt">Ketuk kartu untuk menempel \u{0001F446}</p>
       </div>
-      <div class="btnrow"><button class="btn btn-o" onclick="sim.step=2;renderSimStep()">\u2190 Kembali</button></div>`;
+      <div class="btnrow stick"><button class="btn btn-o" onclick="sim.step=2;renderSimStep()">\u2190 Kembali</button></div>`;
   } else {
     const total = Math.round(sim.berat * sim.harga);
     const boxCat = sim.cat || cats[0] || "";
@@ -774,7 +804,7 @@ function renderSimStep(){
         <div class="kv"><span>Total diterima</span><b style="font-size:20px;color:var(--nba-d)">${rp(total)}</b></div>
       </div>
       ${DB.offline?'<div class="offline-bar">\u{0001F4F4} Mode offline: transaksi akan masuk antrean.</div>':""}
-      <div class="btnrow"><button class="btn btn-o" onclick="sim.step=3;renderSimStep()">\u2190 Kembali</button>
+      <div class="btnrow stick"><button class="btn btn-o" onclick="sim.step=3;renderSimStep()">\u2190 Kembali</button>
       <button class="btn btn-p" onclick="simFinish()">\u2713 Konfirmasi & Simpan</button></div>`;
   }
   openModal(`<button class="mclose noprint" onclick="closeModal()">\u00D7</button>
@@ -911,9 +941,11 @@ function openRegister(){
     <div class="formrow"><label>Nama lengkap</label><input id="rgNama" placeholder="cth: Dewi Lestari"></div>
     <div class="formrow"><label>No. HP / WhatsApp</label><input id="rgTel" inputmode="numeric" placeholder="cth: 081234567890"></div>
     <div class="formrow"><label>Alamat</label><input id="rgAlamat" placeholder="cth: Jl. Slamet Riyadi No. 10"></div>
+    <div class="formrow"><label>Unit BSU asal</label><select id="rgUnit"></select></div>
     <div class="formrow"><label>Password</label><input id="rgPass" type="password" placeholder="min. 6 karakter" autocomplete="new-password"></div>
     <div class="btnrow"><button class="btn btn-o" onclick="closeModal()">Batal</button>
     <button class="btn btn-p" onclick="doRegister()">Daftar</button></div>`);
+  document.getElementById("rgUnit").innerHTML = bsuOptions("");
 }
 async function doRegister(){
   const nama = document.getElementById("rgNama").value.trim();
@@ -921,9 +953,11 @@ async function doRegister(){
   const alamat = document.getElementById("rgAlamat").value.trim();
   const pass = document.getElementById("rgPass").value;
   if(!nama || tel.length < 10){ showAlert("Isi nama dan No. HP yang valid (min 10 digit).", "err"); return; }
+  const unit = document.getElementById("rgUnit").value;
+  if(!unit){ showAlert("Pilih unit BSU asal dulu.", "err"); return; }
   if(!pass || pass.length < 6){ showAlert("Password minimal 6 karakter.", "err"); return; }
   try{
-    const r = await apiPost("/auth/register", { nama: nama, tel: tel, alamat: alamat, password: pass });
+    const r = await apiPost("/auth/register", { nama: nama, tel: tel, alamat: alamat, password: pass, unit: unit });
     ME = mapUser(r.user);
     await loadServerData();
   }catch(e){ showAlert("Pendaftaran gagal: " + e.message, "err"); return; }
@@ -943,8 +977,8 @@ async function doLogin(){
     const r = await apiPost("/auth/login", { username: u, password: p });
     ME = mapUser(r.user);
     await loadServerData();
+    l.classList.remove("show"); setTimeout(()=>{ l.style.display = "none"; }, 280);
     renderAll();
-    /* loader dibiarkan menyala terus sampai loginAs selesai transisi — tidak ada kedip balik ke halaman login */
     loginAs(ME.role === "admin" ? "admin" : "nasabah");
   }catch(e){
     l.classList.remove("show"); setTimeout(()=>{ l.style.display = "none"; }, 280);
@@ -953,7 +987,7 @@ async function doLogin(){
 }
 async function logout(){
   try{ await apiPost("/auth/logout"); }catch(e){}
-  ME = null; clearHashTab(); go("landing");
+  ME = null; go("landing");
   try{
     const c = JSON.parse(localStorage.getItem(SERVER_CACHE_KEY) || "null");
     if(c){ c.ME = null; c.users = []; c.transaksi = []; localStorage.setItem(SERVER_CACHE_KEY, JSON.stringify(c)); }
@@ -965,12 +999,26 @@ function renderUserRows(){
   el.innerHTML = DB.users.map(u=>`<tr>
     <td data-label="ID" style="white-space:nowrap;font-weight:700">${u.id}</td>
     <td data-label="Nama">${u.nama}</td>
+    <td data-label="Unit BSU">${namaBSU(u.unit)}</td>
     <td data-label="No. HP" style="white-space:nowrap">${u.tel||"-"}</td>
     <td data-label="Saldo" style="white-space:nowrap">${rp(u.saldo)}</td>
     <td data-label="Total" style="white-space:nowrap">${String(u.totalKg).replace(".",",")} Kg</td>
     <td data-label="Status"><span class="pill ${u.aktif?"g":"o"}">${u.aktif?"Aktif":"Nonaktif"}</span></td>
     <td data-label="Aksi" style="text-align:right;white-space:nowrap"><button class="btn btn-o" style="padding:7px 12px" onclick="userForm('${u.id}')">Kelola</button></td>
   </tr>`).join("");
+}
+/* nama BSU dari id stasiun — dipakai di tabel nasabah, transaksi & laporan */
+function namaBSU(unitId){
+  if(!unitId) return "-";
+  const s = (DB.stasiun||[]).find(x=>x.id===unitId);
+  return s ? s.nama : unitId;
+}
+function unitOfUser(uid){
+  const u = (DB.users||[]).find(x=>x.id===uid);
+  return (u && u.unit) ? namaBSU(u.unit) : "";
+}
+function bsuOptions(sel){
+  return `<option value="">— Pilih BSU —</option>` + (DB.stasiun||[]).map(s=>`<option value="${s.id}"${s.id===sel?" selected":""}>${s.id} · ${s.nama}</option>`).join("");
 }
 function userForm(id){
   const u = DB.users.find(x=>x.id===id);
@@ -979,6 +1027,7 @@ function userForm(id){
     <h2>Kelola Nasabah</h2><p class="msub">${u.id}</p>
     <div class="formrow"><label>Nama lengkap</label><input id="usNama" value="${u.nama.replace(/"/g,"&quot;")}"></div>
     <div class="formrow"><label>No. HP</label><input id="usTel" value="${u.tel||""}" inputmode="numeric"></div>
+    <div class="formrow"><label>Unit BSU asal</label><select id="usUnit">${bsuOptions(u.unit)}</select></div>
     <div class="formrow"><label>Status akun</label><select id="usAktif">
       <option value="1"${u.aktif?" selected":""}>Aktif</option>
       <option value="0"${u.aktif?"":" selected"}>Nonaktif — tidak bisa login</option>
@@ -992,6 +1041,7 @@ async function saveUser(id){
   const body = {
     nama: document.getElementById("usNama").value.trim(),
     tel: document.getElementById("usTel").value.replace(/\D/g,""),
+    unit: document.getElementById("usUnit").value,
     aktif: document.getElementById("usAktif").value === "1",
   };
   if(pw) body.password = pw;
@@ -1011,7 +1061,7 @@ function renderBeritaRows(){
 function renderLaporan(){
   const top = DB.users.slice().sort((a,b)=>b.totalKg-a.totalKg).slice(0,5);
   const el = document.getElementById("topNasabah");
-  if(el) el.innerHTML = top.map((u,i)=>`<tr><td data-label="Peringkat">${i+1}</td><td data-label="Nama">${u.nama}</td><td data-label="Total Kg" style="text-align:right">${String(u.totalKg).replace(".",",")}</td></tr>`).join("");
+  if(el) el.innerHTML = top.map((u,i)=>{ const un = u.unit ? namaBSU(u.unit) : ""; return `<tr><td data-label="Peringkat">${i+1}</td><td data-label="Nama">${u.nama}${un?`<br><small style="color:var(--mut)">${un}</small>`:""}</td><td data-label="Total Kg" style="text-align:right">${String(u.totalKg).replace(".",",")}</td></tr>`; }).join("");
   const komp = {};
   DB.transaksi.filter(t=>t.tipe==="setor").forEach(t=>{
     const cat = t.kategori || "Lainnya";
@@ -1042,7 +1092,7 @@ function stasiunForm(id){
     <div class="formrow"><label>Kecamatan</label><input id="stLokasi" value="${(s.lokasi||"").replace(/"/g,"&quot;")}"></div>
     <div class="formrow"><label>Alamat</label><input id="stAlamat" value="${(s.alamat||"").replace(/"/g,"&quot;")}"></div>
     <div class="formrow"><label>Jam operasional</label><input id="stJam" value="${(s.jam||"").replace(/"/g,"&quot;")}"></div>
-    <div class="formrow"><label>Titik lokasi <span style="font-weight:400;color:var(--mut)">— klik peta untuk menandai</span></label><div id="stMapPick" style="height:230px;border-radius:12px;border:1px solid var(--line)"></div></div>
+    <div class="formrow"><label>Titik lokasi <span style="font-weight:400;color:var(--mut)">— klik peta untuk menandai</span></label><div id="stMapPick" style="height:230px;border-radius:12px;border:1px solid var(--line)"></div><button type="button" class="btn btn-o" style="margin-top:8px;width:100%;padding:10px;font-size:13px" id="myLocBtn" onclick="goToMyLocation()">📍 Gunakan Lokasi Saya</button></div>
     <input type="hidden" id="stLat" value="${s.lat ?? ''}">
     <input type="hidden" id="stLng" value="${s.lng ?? ''}">
     <div class="formrow"><label>Status</label><select id="stStatus">${["Online","Offline","Maintenance"].map(x=>`<option ${x===s.status?"selected":""}>${x}</option>`).join("")}</select></div>
@@ -1054,7 +1104,7 @@ let stPickMap = null, stPickMarker = null;
 function initStasiunMapPick(id){
   const el = document.getElementById("stMapPick");
   if(!el || typeof L === "undefined") return;
-  if(stPickMap){ stPickMap.remove(); stPickMap = null; stPickMarker = null; }
+  if(stPickMap){ stPickMap.remove(); stPickMap = null; stPickMarker = null; stMyLocMarker = null; }
   const cur = id ? DB.stasiun.find(x=>x.id===id) : null;
   const lat = (cur && cur.lat != null) ? cur.lat : SKA_CENTER[0];
   const lng = (cur && cur.lng != null) ? cur.lng : SKA_CENTER[1];
@@ -1068,11 +1118,35 @@ function initStasiunMapPick(id){
     document.getElementById("stLat").value = la.toFixed(6);
     document.getElementById("stLng").value = ln.toFixed(6);
     if(stPickMarker) stPickMarker.setLatLng([la, ln]);
-    else stPickMarker = L.marker([la, ln]).addTo(stPickMap);
+    else stPickMarker = L.marker([la, ln], { icon: pickIcon() }).addTo(stPickMap);
   };
   if(cur && cur.lat != null && cur.lng != null) setLL(cur.lat, cur.lng);
   stPickMap.on("click", e=>{ setLL(e.latlng.lat, e.latlng.lng); stPickMap.scrollWheelZoom.enable(); });
   setTimeout(()=>{ if(stPickMap) stPickMap.invalidateSize(); }, 150);
+}
+/* tampilkan posisi GPS user di peta picker + pindahkan pin ke sana */
+let stMyLocMarker = null;
+function goToMyLocation(){
+  const btn = document.getElementById("myLocBtn");
+  if(!navigator.geolocation){ showAlert("Browser tidak mendukung GPS.", "err"); return; }
+  if(btn){ btn.disabled = true; btn.textContent = "⏳ Mencari lokasi…"; }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const la = pos.coords.latitude, ln = pos.coords.longitude;
+    if(stPickMap){
+      stPickMap.flyTo([la, ln], 15, { duration: 1 });
+      if(stMyLocMarker) stMyLocMarker.setLatLng([la, ln]);
+      else stMyLocMarker = L.marker([la, ln], { icon: L.divIcon({ className:"", html:'<div class="myloc"></div>', iconSize:[18,18], iconAnchor:[9,9] }) }).addTo(stPickMap);
+      /* pindahkan pin stasiun ke lokasi saya */
+      document.getElementById("stLat").value = la.toFixed(6);
+      document.getElementById("stLng").value = ln.toFixed(6);
+      if(stPickMarker) stPickMarker.setLatLng([la, ln]);
+      else stPickMarker = L.marker([la, ln], { icon: pickIcon() }).addTo(stPickMap);
+    }
+    if(btn){ btn.disabled = false; btn.textContent = "📍 Gunakan Lokasi Saya"; }
+  }, err=>{
+    if(btn){ btn.disabled = false; btn.textContent = "📍 Gunakan Lokasi Saya"; }
+    showAlert("Gagal dapat lokasi: " + (err.code===1 ? "izin GPS ditolak." : "coba lagi."), "err");
+  }, { enableHighAccuracy: true, timeout: 10000 });
 }
 async function saveStasiun(id){
   const nama = document.getElementById("stNama").value.trim();
@@ -1211,7 +1285,9 @@ function beritaForm(i){
     <h2>${i==null?"Tulis":"Ubah"} Berita</h2><p class="msub">Tampil di landing page.</p>
     <div class="formrow"><label>Judul</label><input id="brJudul" value="${b.judul.replace(/"/g,"&quot;")}"></div>
     <div class="formrow"><label>Isi</label><textarea id="brIsi" rows="3">${b.isi}</textarea></div>
-    <div class="formrow"><label>Gambar <span style="font-weight:400">(upload atau link, opsional)</span></label><div style="display:flex;gap:8px;margin-bottom:8px"><input type="file" id="brFile" accept="image/jpeg,image/png,image/webp" style="flex:1;min-width:0"><button type="button" class="btn btn-o" id="brUpBtn" onclick="uploadBeritaGambar()">Upload</button></div><input id="brGambar" value="${(b.gambar||"").replace(/"/g,"&quot;")}" placeholder="https://…" oninput="document.getElementById('brPrev').src=this.value;document.getElementById('brPrev').style.display=this.value?'block':'none'"><img id="brPrev" src="${(b.gambar||"").replace(/"/g,"&quot;")}" style="display:${b.gambar?"block":"none"};width:100%;height:120px;object-fit:cover;border-radius:10px;margin-top:8px"></div>
+    <div class="formrow"><label>Gambar <span style="font-weight:400">(upload atau link, opsional)</span></label>
+      <div style="display:flex;gap:8px;margin-bottom:8px"><input type="file" id="brFile" accept="image/jpeg,image/png,image/webp" style="flex:1;font-size:13px"><button type="button" class="btn btn-o" style="flex:0 0 auto;padding:10px 16px;font-size:13px" id="brUpBtn" onclick="uploadBeritaGambar()">Upload</button></div>
+      <input id="brGambar" value="${(b.gambar||"").replace(/"/g,"&quot;")}" placeholder="https://…" oninput="document.getElementById('brPrev').src=this.value;document.getElementById('brPrev').style.display=this.value?'block':'none'"><img id="brPrev" src="${(b.gambar||"").replace(/"/g,"&quot;")}" style="display:${b.gambar?"block":"none"};width:100%;height:120px;object-fit:cover;border-radius:10px;margin-top:8px"></div>
     <div class="formrow"><label>Warna kartu</label><div class="swatches" id="brSwatches">${palet.map(p=>`<button type="button" class="sw${p===b.warna?" on":""}" data-w="${p}" style="background:${p}" onclick="pickWarna(this)" title="${p}"></button>`).join("")}</div><input type="hidden" id="brWarna" value="${b.warna}"></div>
     <div class="btnrow"><button class="btn btn-o" onclick="closeModal()">Batal</button>
     <button class="btn btn-p" onclick="saveBerita(${i==null?"null":i})">Simpan</button></div>`);
@@ -1223,21 +1299,22 @@ function pickWarna(el){
 }
 async function uploadBeritaGambar(){
   const inp = document.getElementById("brFile");
-  if(!inp || !inp.files.length){ showAlert("Pilih file foto dulu.", "warn"); return; }
   const btn = document.getElementById("brUpBtn");
-  btn.disabled = true; const t0 = btn.textContent; btn.textContent = "Mengunggah…";
+  const f = inp && inp.files[0];
+  if(!f){ showAlert("Pilih file gambar dulu (JPG/PNG/WebP).", "info"); return; }
+  if(f.size > 5*1024*1024){ showAlert("Ukuran maksimal 5MB.", "err"); return; }
+  btn.disabled = true; btn.textContent = "Mengunggah…";
   try{
-    const fd = new FormData(); fd.append("file", inp.files[0]);
-    const r = await fetch(API + "/upload", { method: "POST", body: fd, credentials: "include" });
-    const j = await r.json().catch(()=>({}));
-    if(!r.ok || !j.ok) throw new Error((j && j.error) || ("HTTP " + r.status));
+    const fd = new FormData(); fd.append("file", f);
+    const r = await fetch(API + "/upload", { method:"POST", body:fd, credentials:"include" });
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.error || "Upload gagal");
     const url = API + "/uploads/" + j.file;
     document.getElementById("brGambar").value = url;
-    const prev = document.getElementById("brPrev");
-    prev.src = url; prev.style.display = "block";
-    showAlert("Foto terupload.", "ok");
+    const pv = document.getElementById("brPrev"); pv.src = url; pv.style.display = "block";
+    showAlert("Foto berhasil diunggah.", "ok");
   }catch(e){ showAlert("Upload gagal: " + e.message, "err"); }
-  btn.disabled = false; btn.textContent = t0;
+  btn.disabled = false; btn.textContent = "Upload";
 }
 async function saveBerita(i){
   const judul = document.getElementById("brJudul").value.trim();
@@ -1380,7 +1457,36 @@ function exportCSV(){
   addNotif("admin","Export selesai","Data transaksi diunduh sebagai CSV.");
 }
 function exportLaporan(){
-  window.print();
+  const tgl = new Date().toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" });
+  const top = DB.users.slice().sort((a,b)=>(b.totalKg||0)-(a.totalKg||0)).slice(0,10);
+  const komp = {};
+  let totKg = 0, totRp = 0, nSetor = 0;
+  DB.transaksi.forEach(t=>{
+    if(t.tipe==="setor"){ totKg += (t.satuan==="Kg"?t.berat:0); totRp += t.total||0; nSetor++;
+      const cat = t.kategori || "Lainnya"; komp[cat] = (komp[cat]||0) + (t.satuan==="Kg"?t.berat:0); }
+  });
+  const pa = document.getElementById("printArea");
+  pa.innerHTML = `<div style="max-width:700px;margin:0 auto;font-family:Arial,sans-serif;color:#111">
+    <h2 style="margin:0 0 2px">Laporan Bank Sampah NBA</h2>
+    <p style="margin:0 0 18px;color:#555;font-size:13px">Per ${tgl} · ${DB.stasiun.length} stasiun · ${DB.users.length} nasabah</p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px">
+      <tr><td style="border:1px solid #999;padding:8px"><b>Total Setoran</b><br>${nSetor} transaksi</td>
+      <td style="border:1px solid #999;padding:8px"><b>Total Berat</b><br>${String(Math.round(totKg*100)/100).replace(".",",")} Kg</td>
+      <td style="border:1px solid #999;padding:8px"><b>Total Nilai</b><br>${rp(Math.round(totRp))}</td></tr>
+    </table>
+    <h3 style="margin:0 0 8px">Nasabah Teratas</h3>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px">
+      <thead><tr><th style="border:1px solid #999;padding:8px;background:#eee">#</th><th style="border:1px solid #999;padding:8px;background:#eee;text-align:left">Nama</th><th style="border:1px solid #999;padding:8px;background:#eee;text-align:right">Total Kg</th></tr></thead>
+      <tbody>${top.map((u,i)=>`<tr><td style="border:1px solid #999;padding:8px;text-align:center">${i+1}</td><td style="border:1px solid #999;padding:8px">${u.nama}</td><td style="border:1px solid #999;padding:8px;text-align:right">${String(u.totalKg||0).replace(".",",")}</td></tr>`).join("") || '<tr><td colspan="3" style="border:1px solid #999;padding:8px">Belum ada data.</td></tr>'}</tbody>
+    </table>
+    <h3 style="margin:0 0 8px">Komposisi Sampah</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr><th style="border:1px solid #999;padding:8px;background:#eee;text-align:left">Kategori</th><th style="border:1px solid #999;padding:8px;background:#eee;text-align:right">Berat (Kg)</th></tr></thead>
+      <tbody>${Object.entries(komp).map(([k,v])=>`<tr><td style="border:1px solid #999;padding:8px">${k}</td><td style="border:1px solid #999;padding:8px;text-align:right">${String(Math.round(v*100)/100).replace(".",",")}</td></tr>`).join("") || '<tr><td colspan="2" style="border:1px solid #999;padding:8px">Belum ada data.</td></tr>'}</tbody>
+    </table>
+  </div>`;
+  pa.style.display = "";
+  setTimeout(()=>{ window.print(); setTimeout(()=>pa.style.display="none", 400); }, 300);
 }
 function filterTrx(){
   const q = (document.getElementById("fSearch").value||"").toLowerCase();
