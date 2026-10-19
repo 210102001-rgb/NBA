@@ -229,7 +229,7 @@ function trxRows(full){
     const tipe = t.tipe==="tarik" ? "Tarik Tunai" : t.kategori;
     const unitLbl = unitOfUser(t.userId);
     const namaCell = t.nama + (unitLbl ? `<br><small style="color:var(--mut)">${unitLbl}</small>` : "");
-    return `<tr onclick="showTrxDetail('${t.id}')" style="cursor:pointer"><td data-label="Waktu">${t.tgl.split(" · ")[1]||t.tgl}</td><td data-label="User">${namaCell}</td><td data-label="Stasiun">${t.stasiun}</td><td data-label="Kategori">${tipe}</td><td data-label="Berat">${String(t.berat).replace(".",",")} ${t.satuan||"Kg"}</td>${full?`<td data-label="Harga/Kg">${rp(t.harga)}</td>`:""}<td data-label="Total" style="text-align:right;font-weight:700">${t.tipe==="tarik"?"−":"+"}${rp(t.total)}</td>${full?`<td data-label="Status">${st}</td>`:""}</tr>`;
+    return `<tr onclick="showTrxDetail('${t.id}')" style="cursor:pointer"><td data-label="Waktu">${t.tgl.split(" · ")[1]||t.tgl}</td><td data-label="User">${namaCell}</td><td data-label="Stasiun">${t.stasiun}</td><td data-label="Kategori">${tipe}</td><td data-label="Berat">${t.berat?String(t.berat).replace(".",",")+" "+(t.satuan||"Kg"):"-"}</td>${full?`<td data-label="Harga/Kg">${t.harga?rp(t.harga):"-"}</td>`:""}<td data-label="Total" style="text-align:right;font-weight:700">${t.tipe==="tarik"?"−":"+"}${rp(t.total)}</td>${full?`<td data-label="Status">${st}</td>`:""}</tr>`;
   }).join("");
 }
 function stDot(s){ return s==="Online"?"g":(s==="Offline"?"o":"b"); }
