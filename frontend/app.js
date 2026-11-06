@@ -40,7 +40,7 @@ const mapStasiun = s => ({ id: s.id, nama: s.nama, lokasi: s.lokasi, status: s.s
 function mapHarga(h){ const o = {}; for(const k of Object.keys(h || {})) o[k] = h[k].map(x => [x.item, x.harga, x.satuan]); return o; }
 const mapBerita = b => ({ _id: b.id, tgl: b.tgl, judul: b.judul, isi: b.isi, warna: b.warna, icon: b.icon, gambar: b.gambar || "" });
 const mapTrx = t => ({ id: t.id, tgl: t.tgl, userId: t.user_id, nama: t.nama, stasiun: t.stasiun_id, kategori: t.kategori, item: t.item, berat: t.berat, harga: t.harga, satuan: t.satuan, total: t.total, tipe: t.tipe, metode: t.metode, status: t.status });
-const mapUser = u => ({ id: u.id, username: u.username, nama: u.nama, role: u.role, tel: u.tel, nfc: u.nfc, saldo: u.saldo || 0, totalKg: u.total_kg || 0, trx: u.trx_count || 0, sejak: u.sejak, aktif: !!u.aktif });
+const mapUser = u => ({ id: u.id, username: u.username, nama: u.nama, role: u.role, tel: u.tel, nfc: u.nfc, unit: u.unit || null, saldo: u.saldo || 0, totalKg: u.total_kg || 0, trx: u.trx_count || 0, sejak: u.sejak, aktif: !!u.aktif });
 
 const CLIENT_KEY = "nba_client_v1";
 function saveClientCache(){

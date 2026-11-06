@@ -62,11 +62,11 @@ test('auth guard: tanpa login -> 401, nasabah -> 403 di rute admin', async () =>
   assert.equal(f.status, 403);
 });
 
-test('stasiun: seed 12 titik + CRUD admin', async () => {
+test('stasiun: seed 4 titik + CRUD admin', async () => {
   const r = await get('/api/stasiun');
   assert.equal(r.status, 200);
-  assert.equal(r.data.stasiun.length, 12);
-  assert.ok(r.data.stasiun.some((s) => s.id === 'ST-12' && typeof s.lat === 'number'));
+  assert.equal(r.data.stasiun.length, 4);
+  assert.ok(r.data.stasiun.some((s) => s.id === 'ST-07' && typeof s.lat === 'number'));
 
   const asNasabah = await post('/api/stasiun', { cookie: globalThis.__nasabah, body: { id: 'ST-99', nama: 'X' } });
   assert.equal(asNasabah.status, 403);
@@ -87,7 +87,7 @@ test('stasiun: seed 12 titik + CRUD admin', async () => {
 
 test('harga: baca + ubah admin tercatat di riwayat', async () => {
   const r = await get('/api/harga');
-  assert.ok(r.data.harga.Plastik.length > 10);
+  assert.equal(r.data.harga.Plastik.length, 7);
   const kardus = r.data.harga.Kertas.find((x) => x.item === 'Kardus');
   assert.equal(kardus.harga, 1500);
 
@@ -105,7 +105,7 @@ test('harga: baca + ubah admin tercatat di riwayat', async () => {
 
 test('transaksi: setor nambah saldo, tarik kurang saldo + validasi', async () => {
   const nc = globalThis.__nasabah;
-  // setor 2 Kg Kardus @1600 = 3200 ; saldo awal Andi 125000
+  // setor 2 Kg Kardus @1600 = 3200 ; saldo awal Andi 125000 (Kardus 1600 karena tes harga sebelumnya mengubahnya dari seed 1500 — tes berbagi satu DB)
   const s = await post('/api/transaksi', { cookie: nc, body: { stasiun_id: 'ST-01', kategori: 'Kertas', item: 'Kardus', berat: 2 } });
   assert.equal(s.status, 201);
   assert.equal(s.data.total, 3200);
